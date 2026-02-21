@@ -1,19 +1,22 @@
-import { defineNuxtModule, addPlugin, createResolver } from '@nuxt/kit'
+import {
+  defineNuxtModule,
+  addPlugin,
+  addImportsDir,
+  createResolver,
+  addServerImportsDir,
+} from '@nuxt/kit'
 
-// Module options TypeScript interface definition
-export interface ModuleOptions {}
-
-export default defineNuxtModule<ModuleOptions>({
+export default defineNuxtModule({
   meta: {
-    name: 'my-module',
-    configKey: 'myModule',
+    name: 'pms-logger',
+    configKey: 'logger',
   },
-  // Default configuration options of the Nuxt module
-  defaults: {},
-  setup(_options, _nuxt) {
+
+  setup() {
     const resolver = createResolver(import.meta.url)
 
-    // Do not add the extension since the `.ts` will be transpiled to `.mjs` after `npm run prepack`
-    addPlugin(resolver.resolve('./runtime/plugin'))
+    addPlugin(resolver.resolve('runtime/plugin'))
+    addImportsDir(resolver.resolve('runtime/composables'))
+    addServerImportsDir(resolver.resolve('runtime/composables'))
   },
 })

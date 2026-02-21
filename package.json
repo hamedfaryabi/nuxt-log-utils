@@ -1,10 +1,22 @@
 {
   "name": "nuxt-log",
-  "version": "1.0.0",
-  "description": "My new Nuxt module",
-  "repository": "your-org/my-module",
+  "version": "0.1.0",
+  "description": "A flexible, extensible logger module for Nuxt 4 with masking, file rotation, per-level config, and transport extensions.",
   "license": "MIT",
   "type": "module",
+  "author": "Hamed Faryabi <hamed.faryabi9@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hamedfaryabi/nux-log"
+  },
+  "homepage": "https://github.com/hamedfaryabi/nux-log#readme",
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "logger",
+    "logging",
+    "nuxt4"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types.d.mts",
@@ -37,7 +49,12 @@
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
   },
   "dependencies": {
-    "@nuxt/kit": "^4.3.1"
+    "@nuxt/kit": "^4.3.1",
+    "consola": "^3.4.2",
+    "defu": "^6.1.4"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.0.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "^3.2.1",
