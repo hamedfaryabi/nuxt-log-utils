@@ -61,5 +61,10 @@ export interface LoggerConfig<dataT extends Record<string, any> = Record<string,
    * When a log is sent, if the level has a config here,
    * it is merged (with priority) over the global config.
    */
-  levels?: Partial<Record<LogLevelKey, LogLevelConfig<dataT>>>
+  levels?: Partial<Record<LogLevel | LogLevelKey, LogLevelConfig<dataT>>>
+  /**
+   * Named logger config overrides.
+   * Keys are logger names passed to `useLogger(name)`.
+   */
+  loggers?: Record<string, Partial<LoggerConfig<dataT>>>
 }

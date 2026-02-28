@@ -1,4 +1,5 @@
 import type { LoggerMeta } from '../types'
+import { useRoute } from '#imports'
 
 /**
  * Builds default metadata

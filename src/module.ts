@@ -8,7 +8,7 @@ import {
 
 export default defineNuxtModule({
   meta: {
-    name: 'pms-logger',
+    name: 'nuxt-log',
     configKey: 'logger',
   },
 

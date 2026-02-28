@@ -8,9 +8,10 @@ function defaultMask(value: string | number): string {
 
 export function applyMask(
   obj: any,
-  mask: string[] | Record<string, MaskCustomizer>,
+  mask: string[] | Record<string, MaskCustomizer> | undefined,
 ): any {
   if (!obj || typeof obj !== 'object') return obj
+  if (!mask) return obj
 
   const isArray = Array.isArray(mask)
   const keys = isArray ? mask : Object.keys(mask)
