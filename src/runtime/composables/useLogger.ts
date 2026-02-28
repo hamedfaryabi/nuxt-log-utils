@@ -1,111 +1,66 @@
-/* eslint-disable no-console */
-
-import { defu } from 'defu'
-import type { LoggerConfig, LogPayload } from '../types'
-import { LogLevel } from '../types'
+// src/runtime/composables/useLogger.ts
+import { useRuntimeConfig } from '#imports'
+import { LogLevel, type LoggerConfig, type LogPayload, type OutputTarget } from '../types'
+import { resolveConfig } from '../utils/resolveConfig'
 import { shouldLog } from '../utils/level'
+import { applyMask } from '../utils/mask'
 import { buildPayload } from '../utils/buildPayload'
+import { buildMeta } from '../utils/buildMeta'
 import { consoleTransport } from '../transports/console'
 import { fileTransport } from '../transports/file'
 import { apiTransport } from '../transports/api'
-import { useRuntimeConfig } from '#imports'
-import { applyMask } from '../utils/mask'
-import { resolveFilePath } from '../utils/resolveFilePath'
-import { resolveConfig } from '../utils/resolveConfig'
 
-/**
- * Global logger composable
- */
-export function useLogger(overrideConfig: LoggerConfig = {}) {
-  const runtimeConfig = useRuntimeConfig().public.logger || {}
+const transports: Record<OutputTarget, (payload: LogPayload, config: LoggerConfig) => Promise<void>> = {
+  console: consoleTransport,
+  file: fileTransport,
+  api: apiTransport,
+} as const
 
-  const DEFAULT_CONFIGS: LoggerConfig = {
-    minLevel: LogLevel.DEBUG,
-    includeMeta: true,
-  }
+export function useLogger(name?: string) {
+  const globalConfig = useRuntimeConfig().public.logger as Partial<LoggerConfig>
 
-  const config = defu(
-    overrideConfig,
-    runtimeConfig,
-    DEFAULT_CONFIGS,
-  ) as LoggerConfig
+  async function send(level: LogLevel, message: string, data?: Record<string, any>) {
+    const config = resolveConfig(globalConfig, name, level)
 
-  async function send(payload: LogPayload) {
-    const level = payload.level as LogLevel
+    if (!shouldLog(level, config.minLevel, config.maxLevel, config.allowedLevels)) return
 
-    // Resolve effective config for this level
-    const effectiveConfig = resolveConfig(config, level)
+    let payload = buildPayload({ level, message, data, meta: buildMeta() }, config)
 
-    if (!shouldLog(
-      level,
-      effectiveConfig.minLevel,
-      effectiveConfig.maxLevel,
-      effectiveConfig.allowedLevels,
-    )) return
-
-    // 1. beforeSend hook
-    if (effectiveConfig.beforeSend) {
-      const result = effectiveConfig.beforeSend(payload)
+    if (config.beforeSend) {
+      const result = await config.beforeSend(payload)
       if (result === false) return
       if (result) payload = result
     }
 
-    // 2. Apply masking (after beforeSend, before formatter)
-    if (effectiveConfig.mask) {
-      payload = {
-        ...payload,
-        data: payload.data ? applyMask(payload.data, effectiveConfig.mask) : payload.data,
-        meta: payload.meta ? applyMask(payload.meta, effectiveConfig.mask) : payload.meta,
-      }
+    payload = applyMask(payload, config.mask)
+
+    if (config.formatter) {
+      payload = config.formatter({ payload, config })
     }
 
-    // 3. Build payload & format
-    const finalPayload = buildPayload(payload, effectiveConfig)
-    const formatted = effectiveConfig.formatter
-      ? effectiveConfig.formatter({ payload: finalPayload, config })
-      : finalPayload
+    const outputs: OutputTarget[] = config.output ?? ['console']
 
-    for (const target of effectiveConfig.output ?? []) {
-      try {
-        if (target === 'console') {
-          await consoleTransport(formatted)
-        }
+    await Promise.all(
+      outputs.map(async (t) => {
+        const transport = transports[t]
+        if (transport) await transport(payload, config)
+      })
+    )
 
-        if (target === 'file') {
-          if (import.meta.client && import.meta.dev) {
-            console.warn('[Logger] file transport ignored on client')
-            continue
-          }
-          const resolvedPath = resolveFilePath(
-            effectiveConfig.filePath || 'logs/app.log',
-            effectiveConfig.fileLogPeriod,
-          )
-          await fileTransport(formatted, resolvedPath)
-        }
-
-        if (target === 'api') {
-          await apiTransport(formatted, effectiveConfig.apiUrl!)
-        }
-      } catch (err) {
-        if (import.meta.dev) console.error('[Logger error]', err)
-      }
+    if (config.afterSend) {
+      await config.afterSend(payload)
     }
-
-    // 4. afterSend hook
-    effectiveConfig.afterSend?.(finalPayload)
   }
 
   function create(level: LogLevel) {
-    return (message: string, data?: any, options?: LoggerConfig) =>
-      send({
-        level,
-        message,
-        data,
-        meta: options?.meta,
-      })
+    return (message: string, data?: any) =>
+      send(level, message, data)
   }
 
   return {
+    name,
+    send,
+    create,
     debug: create(LogLevel.DEBUG),
     info: create(LogLevel.INFO),
     notice: create(LogLevel.NOTICE),
@@ -114,6 +69,5 @@ export function useLogger(overrideConfig: LoggerConfig = {}) {
     critical: create(LogLevel.CRITICAL),
     alert: create(LogLevel.ALERT),
     emergency: create(LogLevel.EMERGENCY),
-    create,
   }
 }
