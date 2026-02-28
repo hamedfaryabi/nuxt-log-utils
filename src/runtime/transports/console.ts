@@ -1,15 +1,30 @@
 import { consola } from 'consola'
-import type { LogPayload } from '../types'
+import { LogLevel, type LoggerConfig, type LogPayload } from '../types'
 
-export async function consoleTransport(payload: LogPayload) {
-  const level = typeof payload.level === 'number'
-    ? payload.level
-    : consola.level
+const levelMap: Record<LogLevel, number> = {
+  [LogLevel.DEBUG]: 4,
+  [LogLevel.INFO]: 3,
+  [LogLevel.NOTICE]: 3,
+  [LogLevel.WARNING]: 2,
+  [LogLevel.ERROR]: 1,
+  [LogLevel.CRITICAL]: 0,
+  [LogLevel.ALERT]: 0,
+  [LogLevel.EMERGENCY]: 0,
+}
 
-  consola.log({
-    level,
-    message: payload.message,
-    data: payload.data,
-    meta: payload.meta,
-  })
+export async function consoleTransport(payload: LogPayload, _config: LoggerConfig): Promise<void> {
+  const numericLevel = typeof payload.level === 'number' ? payload.level : LogLevel.INFO
+  const consolaLevel = levelMap[numericLevel as LogLevel] ?? 3
+
+  try {
+    consola.log({
+      level: consolaLevel,
+      message: payload.message,
+      data: payload.data,
+      meta: payload.meta,
+    })
+  }
+  catch (error) {
+    console.error('[nuxt-log] Console transport error:', error)
+  }
 }
