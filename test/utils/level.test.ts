@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { shouldLog } from '../../modules/logger/runtime/utils/level'
-import { LogLevel } from '../../modules/logger/runtime/types'
+import { shouldLog } from '../../src/runtime/utils/level'
+import { LogLevel } from '../../src/runtime/types'
 
 describe('shouldLog', () => {
   it('returns true when no filters are set', () => {

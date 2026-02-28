@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { resolveConfig } from '../../modules/logger/runtime/utils/resolveConfig'
-import { LogLevel } from '../../modules/logger/runtime/types'
+import { resolveConfig } from '../../src/runtime/utils/resolveConfig'
+import { LogLevel } from '../../src/runtime/types'
 
 describe('resolveConfig', () => {
   const baseConfig = {
@@ -10,7 +10,7 @@ describe('resolveConfig', () => {
   }
 
   it('returns global config when no level override exists', () => {
-    const result = resolveConfig(baseConfig, LogLevel.INFO)
+    const result = resolveConfig(baseConfig, undefined, LogLevel.INFO)
     expect(result.output).toEqual(['console'])
   })
 
@@ -18,10 +18,10 @@ describe('resolveConfig', () => {
     const config = {
       ...baseConfig,
       levels: {
-        ERROR: { output: ['file' as const] },
+        [LogLevel.ERROR]: { output: ['file' as const] },
       },
     }
-    const result = resolveConfig(config, LogLevel.ERROR)
+    const result = resolveConfig(config, undefined, LogLevel.ERROR)
     expect(result.output).toEqual(['file'])
   })
 
@@ -30,10 +30,10 @@ describe('resolveConfig', () => {
       ...baseConfig,
       filePath: 'logs/app.log',
       levels: {
-        ERROR: { output: ['file' as const] },
+        [LogLevel.ERROR]: { output: ['file' as const] },
       },
     }
-    const result = resolveConfig(config, LogLevel.ERROR)
+    const result = resolveConfig(config, undefined, LogLevel.ERROR)
     expect(result.filePath).toBe('logs/app.log')
   })
 
@@ -41,10 +41,10 @@ describe('resolveConfig', () => {
     const config = {
       ...baseConfig,
       levels: {
-        ERROR: { output: ['file' as const] },
+        [LogLevel.ERROR]: { output: ['file' as const] },
       },
     }
-    const result = resolveConfig(config, LogLevel.DEBUG)
+    const result = resolveConfig(config, undefined, LogLevel.DEBUG)
     expect(result.output).toEqual(['console'])
   })
 })

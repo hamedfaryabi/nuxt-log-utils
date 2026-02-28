@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { resolveFilePath } from '../../modules/logger/runtime/utils/resolveFilePath'
+import { resolveFilePath } from '../../src/runtime/utils/resolveFilePath'
 
 describe('resolveFilePath', () => {
   beforeEach(() => {

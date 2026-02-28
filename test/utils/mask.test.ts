@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyMask } from '../../modules/logger/runtime/utils/mask'
+import { applyMask } from '../../src/runtime/utils/mask'
 
 describe('applyMask - array mode', () => {
   it('masks matched keys with default masker', () => {
