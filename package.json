@@ -7,15 +7,23 @@
   "author": "Hamed Faryabi <hamed.faryabi9@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hamedfaryabi/nux-log"
+    "url": "https://github.com/hamedfaryabi/nuxt-log"
   },
-  "homepage": "https://github.com/hamedfaryabi/nux-log#readme",
+  "homepage": "https://github.com/hamedfaryabi/nuxt-log#readme",
+  "bugs": {
+    "url": "https://github.com/hamedfaryabi/nuxt-log/issues"
+  },
   "keywords": [
     "nuxt",
     "nuxt-module",
     "logger",
     "logging",
-    "nuxt4"
+    "nuxt4",
+    "nuxt3",
+    "log",
+    "transport",
+    "masking",
+    "consola"
   ],
   "exports": {
     ".": {
@@ -54,7 +62,7 @@
     "defu": "^6.1.4"
   },
   "peerDependencies": {
-    "nuxt": "^4.0.0"
+    "nuxt": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "^3.2.1",
