@@ -19,7 +19,6 @@ export type MaskCustomizer = ((value: string) => string) | false
 
 export interface LoggerMeta {
   timestamp?: string
-  path?: string
   isServer?: boolean
   [key: string]: any
 }

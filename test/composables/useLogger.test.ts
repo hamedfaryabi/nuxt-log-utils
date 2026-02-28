@@ -21,7 +21,6 @@ vi.mock('#imports', () => ({
   useRuntimeConfig: () => ({
     public: { logger: mockLoggerConfig },
   }),
-  useRoute: () => ({ fullPath: '/test' }),
 }))
 
 vi.mock('#app', () => ({
