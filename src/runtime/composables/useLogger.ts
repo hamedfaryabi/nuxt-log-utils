@@ -16,11 +16,11 @@ const transports: Record<OutputTarget, (payload: LogPayload, config: LoggerConfi
   api: apiTransport,
 } as const
 
-export function useLogger(name?: string) {
+export function useLogger(name?: string, configs?: Partial<LoggerConfig>) {
   const globalConfig = useRuntimeConfig().public.logger as Partial<LoggerConfig>
-
+ 
   async function send(level: LogLevel, message: string, data?: Record<string, any>) {
-    const config = resolveConfig(globalConfig, name, level)
+    const config = resolveConfig(configs || {}, globalConfig, name, level)
 
     if (!shouldLog(level, config.minLevel, config.maxLevel, config.allowedLevels)) return
 

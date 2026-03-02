@@ -20,13 +20,24 @@ export async function consoleTransport(
     typeof payload.level === "number" ? payload.level : LogLevel.INFO;
   const consolaLevel = levelMap[numericLevel as LogLevel] ?? 3;
 
+  const args: Record<string, any> = {};
+
+  if(_config.includeMeta && payload.meta){
+    args['meta'] = payload.meta
+  }
+  
+  if(payload.data && Object.keys(payload.data).length > 0){
+    args['data'] = payload.data
+  }
+
   try {
-    consola.log({
-      level: consolaLevel,
-      message: payload.message,
-      data: payload.data,
-      meta: payload.meta,
-    });
+    consola.log(
+      {
+        level: consolaLevel,
+        message: payload.message,
+        ...(Object.keys(args).length > 0 && {args: [args]})
+      }
+    );
   } catch (error) {
     console.error("[nuxt-log] Console transport error:", error);
   }

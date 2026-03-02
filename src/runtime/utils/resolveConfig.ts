@@ -34,20 +34,23 @@ function mergeConfigs(...configs: Partial<LoggerConfig>[]): LoggerConfig {
 }
 
 export function resolveConfig(
+  loggerConfig: Partial<LoggerConfig>,
   globalConfig: Partial<LoggerConfig>,
   loggerName: string | undefined,
   levelName?: LogLevel,
 ): LoggerConfig {
+  // config from nuxt.config.ts
   const namedStaticConfig: Partial<LoggerConfig> =
     loggerName && globalConfig.loggers?.[loggerName]
       ? globalConfig.loggers[loggerName]
       : {}
 
+  // config from env
   const envConfig: Partial<LoggerConfig> = loggerName
     ? resolveEnvConfig(loggerName)
     : {}
 
-  let effective = mergeConfigs(envConfig, namedStaticConfig, globalConfig)
+  let effective = mergeConfigs(envConfig, loggerConfig, namedStaticConfig, globalConfig)
 
   if (levelName && effective.levels?.[levelName]) {
     const levelOverride = effective.levels[levelName] as Partial<LoggerConfig>

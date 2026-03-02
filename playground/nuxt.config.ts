@@ -32,7 +32,7 @@ export default defineNuxtConfig({
             filePath: 'logs/payment.log',
             fileLogPeriod: 'monthly',
             mask: {
-              cardNumber: (v: string) => `****${v.slice(-4)}`,
+              cardNumber: () => (v: string) => `****${v.slice(-4)}`,
               cvv: false,
             },
           },

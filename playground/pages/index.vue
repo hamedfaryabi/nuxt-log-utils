@@ -4,6 +4,13 @@
     <p>Open the browser console to see log output.</p>
 
     <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 400px;">
+      <label for="include-meta">
+        <input type="checkbox" v-model="includeMeta" id="include-meta"/>
+        Include meta
+      </label>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 400px; margin-top: 16px;">
       <button @click="logInfo">📗 Log INFO</button>
       <button @click="logWarning">📙 Log WARNING</button>
       <button @click="logError">📕 Log ERROR</button>
@@ -18,27 +25,35 @@
 </template>
 
 <script setup lang="ts">
-const logger = useLogger()
+const logger = computed(()=>{
+  if(includeMeta.value){
+    return useLogger()
+  }
+
+  return useLogger(undefined, {includeMeta: false})
+})
+
 const { $logger } = useNuxtApp()
 const lastLog = ref('')
+const includeMeta = ref<boolean>(true)
 
 function logInfo() {
-  logger.info('Hello from client', { page: 'index' })
+  logger.value.info('Hello from client')
   lastLog.value = 'Sent INFO via useLogger()'
 }
 
 function logWarning() {
-  $logger.warning('Warning from plugin logger', { source: '$logger' })
+  $logger.warning('Warning from plugin logger using $logger')
   lastLog.value = 'Sent WARNING via $logger plugin'
 }
 
 function logError() {
-  logger.error('Something went wrong', { code: 'ERR_TEST' })
+  logger.value.error('Something went wrong')
   lastLog.value = 'Sent ERROR (should also go to file transport on server)'
 }
 
 function logWithData() {
-  logger.info('User action', {
+  logger.value.info('User action', {
     userId: 42,
     action: 'click',
     timestamp: new Date().toISOString(),
@@ -47,14 +62,14 @@ function logWithData() {
 }
 
 function logAllLevels() {
-  logger.debug('Debug message')
-  logger.info('Info message')
-  logger.notice('Notice message')
-  logger.warning('Warning message')
-  logger.error('Error message')
-  logger.critical('Critical message')
-  logger.alert('Alert message')
-  logger.emergency('Emergency message')
+  logger.value.debug('Debug message')
+  logger.value.info('Info message')
+  logger.value.notice('Notice message')
+  logger.value.warning('Warning message')
+  logger.value.error('Error message')
+  logger.value.critical('Critical message')
+  logger.value.alert('Alert message')
+  logger.value.emergency('Emergency message')
   lastLog.value = 'Sent all 8 log levels'
 }
 </script>
