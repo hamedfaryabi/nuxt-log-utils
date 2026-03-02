@@ -15,7 +15,7 @@ export enum LogLevel {
 export type LogLevelKey = keyof typeof LogLevel
 export type OutputTarget = 'console' | 'file' | 'api'
 export type FileLogPeriod = 'daily' | 'monthly' | 'yearly'
-export type MaskCustomizer = ((value: string) => string) | false
+export type MaskCustomizer = ((value: string) => string) | false | true
 
 export interface LoggerMeta {
   timestamp?: string
@@ -35,6 +35,10 @@ export interface LoggerFormatterContext<dataT extends Record<string, any>> {
   config: LoggerConfig<dataT>
 }
 
+export type LoggerMask = 
+  | string[] // flat array of keys
+  | { [key: string]: MaskCustomizer | LoggerMask } // nested object or dot-path keys
+
 export interface LogLevelConfig<dataT extends Record<string, any>> {
   minLevel?: LogLevel
   maxLevel?: LogLevel
@@ -42,7 +46,7 @@ export interface LogLevelConfig<dataT extends Record<string, any>> {
    * **Notice:** If `allowedLevels` is set, it takes full control
    */
   allowedLevels?: LogLevel[]
-  mask?: string[] | Record<string, MaskCustomizer>
+  mask?: LoggerMask
   output?: OutputTarget[]
   apiUrl?: string
   filePath?: string

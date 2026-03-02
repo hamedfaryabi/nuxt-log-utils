@@ -16,9 +16,31 @@ const transports: Record<OutputTarget, (payload: LogPayload, config: LoggerConfi
   api: apiTransport,
 } as const
 
-export function useLogger(name?: string, configs?: Partial<LoggerConfig>) {
-  const globalConfig = useRuntimeConfig().public.logger as Partial<LoggerConfig>
- 
+export function useLogger(name: string, configs?: Partial<LoggerConfig>): ReturnType<typeof _useLogger>
+export function useLogger(configs?: Partial<LoggerConfig>): ReturnType<typeof _useLogger>
+
+export function useLogger(
+  nameOrConfigs?: string | Partial<LoggerConfig>,
+  maybeConfigs?: Partial<LoggerConfig>
+) {
+  let name: string | undefined
+  let configs: Partial<LoggerConfig> | undefined
+
+  if (typeof nameOrConfigs === 'string') {
+    name = nameOrConfigs
+    configs = maybeConfigs
+  } else {
+    name = 'default'
+    configs = nameOrConfigs
+  }
+
+  return _useLogger(name, configs)
+}
+
+function _useLogger(name?: string, configs?: Partial<LoggerConfig>) {
+  const { $loggerConfig } = useNuxtApp()
+  const globalConfig = $loggerConfig
+
   async function send(level: LogLevel, message: string, data?: Record<string, any>) {
     const config = resolveConfig(configs || {}, globalConfig, name, level)
 

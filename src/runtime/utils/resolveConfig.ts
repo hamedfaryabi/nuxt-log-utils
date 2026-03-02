@@ -1,7 +1,7 @@
-import { defu } from 'defu'
-import type { LoggerConfig } from '../types'
-import { LogLevel } from '../types'
-import { resolveEnvConfig } from './resolveEnvConfig'
+import { defu } from "defu";
+import type { LoggerConfig } from "../types";
+import { LogLevel } from "../types";
+import { resolveEnvConfig } from "./resolveEnvConfig";
 
 const DEFAULT_CONFIG: LoggerConfig = {
   minLevel: LogLevel.INFO,
@@ -9,28 +9,33 @@ const DEFAULT_CONFIG: LoggerConfig = {
   allowedLevels: undefined,
   mask: undefined,
   levels: {},
-}
+};
 
 function mergeConfigs(...configs: Partial<LoggerConfig>[]): LoggerConfig {
-  const ARRAY_FIELDS = ['output', 'allowedLevels'] as const
+  const ARRAY_FIELDS = ["output", "allowedLevels"] as const;
 
-  let result = { ...DEFAULT_CONFIG }
+  let result = { ...DEFAULT_CONFIG };
 
-  const reversed = [...configs].reverse()
+  const reversed = [...configs].reverse();
   for (const config of reversed) {
-    result = defu(config, result) as LoggerConfig
+    result = defu(config, result) as LoggerConfig;
   }
 
   for (const field of ARRAY_FIELDS) {
     for (const config of configs) {
-      if (config && field in config && Array.isArray(config[field as keyof typeof config])) {
-        ;(result as Record<string, unknown>)[field] = config[field as keyof typeof config]
-        break
+      if (
+        config &&
+        field in config &&
+        Array.isArray(config[field as keyof typeof config])
+      ) {
+        (result as Record<string, unknown>)[field] =
+          config[field as keyof typeof config];
+        break;
       }
     }
   }
 
-  return result
+  return result;
 }
 
 export function resolveConfig(
@@ -43,19 +48,24 @@ export function resolveConfig(
   const namedStaticConfig: Partial<LoggerConfig> =
     loggerName && globalConfig.loggers?.[loggerName]
       ? globalConfig.loggers[loggerName]
-      : {}
+      : {};
 
   // config from env
   const envConfig: Partial<LoggerConfig> = loggerName
     ? resolveEnvConfig(loggerName)
-    : {}
+    : {};
 
-  let effective = mergeConfigs(envConfig, loggerConfig, namedStaticConfig, globalConfig)
+  let effective = mergeConfigs(
+    envConfig,
+    loggerConfig,
+    namedStaticConfig,
+    globalConfig,
+  );
 
   if (levelName && effective.levels?.[levelName]) {
-    const levelOverride = effective.levels[levelName] as Partial<LoggerConfig>
-    effective = mergeConfigs(levelOverride, effective)
+    const levelOverride = effective.levels[levelName] as Partial<LoggerConfig>;
+    effective = mergeConfigs(levelOverride, effective);
   }
 
-  return effective
+  return effective;
 }
