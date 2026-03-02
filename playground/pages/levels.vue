@@ -16,6 +16,9 @@
       <button @click="testRange">
         📏 minLevel=INFO, maxLevel=WARNING (only INFO, NOTICE, WARNING)
       </button>
+      <button @click="testRangeWithAllowed">
+        📏 minLevel=INFO, maxLevel=WARNING, allowedLevels = [NOTICE, ERROR]  (only NOTICE)
+      </button>
       <button @click="testCustomLevel">
         🛠️ create() custom level shortcut
       </button>
@@ -33,10 +36,13 @@
 <script setup lang="ts">
 import { LogLevel } from '../../src/runtime/types'
 
-const logger = useLogger()
 const results = ref<string[]>([])
 
 function testMinLevel() {
+  const logger = useLogger(undefined, {
+    minLevel: LogLevel.ERROR
+  })
+
   results.value = ['Testing minLevel = ERROR (400)...']
   logger.debug('Should be SKIPPED (debug < error)')
   logger.info('Should be SKIPPED (info < error)')
@@ -47,6 +53,10 @@ function testMinLevel() {
 }
 
 function testMaxLevel() {
+  const logger = useLogger(undefined, {
+    maxLevel: LogLevel.WARNING
+  })
+
   results.value = ['Testing maxLevel = WARNING (300)...']
   logger.debug('Should APPEAR (debug < warning)')
   logger.info('Should APPEAR (info < warning)')
@@ -57,6 +67,9 @@ function testMaxLevel() {
 }
 
 function testAllowedLevels() {
+  const logger = useLogger(undefined, {
+    allowedLevels: [LogLevel.DEBUG, LogLevel.CRITICAL]
+  })
   results.value = ['Testing allowedLevels = [DEBUG, CRITICAL]...']
   logger.debug('Should APPEAR (in allowedLevels)')
   logger.info('Should be SKIPPED (not in allowedLevels)')
@@ -66,6 +79,11 @@ function testAllowedLevels() {
 }
 
 function testRange() {
+  const logger = useLogger(undefined, {
+    minLevel: LogLevel.DEBUG,
+    maxLevel: LogLevel.WARNING
+  })
+
   results.value = ['Testing minLevel=INFO, maxLevel=WARNING...']
   logger.debug('Should be SKIPPED (below INFO)')
   logger.info('Should APPEAR (= minLevel)')
@@ -74,8 +92,25 @@ function testRange() {
   logger.error('Should be SKIPPED (above WARNING)')
   results.value.push('Sent debug through error — only info, notice, warning should appear')
 }
+function testRangeWithAllowed() {
+  const logger = useLogger(undefined, {
+    minLevel: LogLevel.INFO,
+    maxLevel: LogLevel.WARNING,
+    allowedLevels: [LogLevel.NOTICE, LogLevel.ERROR]
+  })
+
+  results.value = ['Testing minLevel=INFO, maxLevel=WARNING, allowedLevels=[NOTICE, ERROR]...']
+  logger.debug('Should be SKIPPED (below INFO)')
+  logger.info('Should be SKIPPED (not in allowedLevels)')
+  logger.notice('Should APPEAR (between min and max and in allowedLevels)')
+  logger.warning('Should be SKIPPED (not in allowedLevels)')
+  logger.error('Should be SKIPPED (above WARNING)')
+  results.value.push('Sent debug through error — only info, notice, warning should appear')
+}
 
 function testCustomLevel() {
+  const logger = useLogger()
+
   results.value = ['Testing create() custom level shortcut...']
   const logAlert = logger.create(LogLevel.ALERT)
   logAlert('Custom ALERT via create()', { custom: true })
