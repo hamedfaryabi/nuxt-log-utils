@@ -30,7 +30,7 @@ const logger = computed(()=>{
     return useLogger()
   }
 
-  return useLogger(undefined, {includeMeta: false})
+  return useLogger({includeMeta: false})
 })
 
 const { $logger } = useNuxtApp()

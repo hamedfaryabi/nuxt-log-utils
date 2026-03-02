@@ -39,7 +39,7 @@ import { LogLevel } from '../../src/runtime/types'
 const results = ref<string[]>([])
 
 function testMinLevel() {
-  const logger = useLogger(undefined, {
+  const logger = useLogger({
     minLevel: LogLevel.ERROR
   })
 
@@ -53,7 +53,7 @@ function testMinLevel() {
 }
 
 function testMaxLevel() {
-  const logger = useLogger(undefined, {
+  const logger = useLogger({
     maxLevel: LogLevel.WARNING
   })
 
@@ -67,7 +67,7 @@ function testMaxLevel() {
 }
 
 function testAllowedLevels() {
-  const logger = useLogger(undefined, {
+  const logger = useLogger({
     allowedLevels: [LogLevel.DEBUG, LogLevel.CRITICAL]
   })
   results.value = ['Testing allowedLevels = [DEBUG, CRITICAL]...']
@@ -79,7 +79,7 @@ function testAllowedLevels() {
 }
 
 function testRange() {
-  const logger = useLogger(undefined, {
+  const logger = useLogger({
     minLevel: LogLevel.DEBUG,
     maxLevel: LogLevel.WARNING
   })
@@ -93,7 +93,7 @@ function testRange() {
   results.value.push('Sent debug through error — only info, notice, warning should appear')
 }
 function testRangeWithAllowed() {
-  const logger = useLogger(undefined, {
+  const logger = useLogger({
     minLevel: LogLevel.INFO,
     maxLevel: LogLevel.WARNING,
     allowedLevels: [LogLevel.NOTICE, LogLevel.ERROR]
