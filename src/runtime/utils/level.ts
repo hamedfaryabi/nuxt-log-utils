@@ -23,7 +23,7 @@ export function shouldLog(
 ): boolean {
   if (minLevel !== undefined && payloadLevel < minLevel) return false
   if (maxLevel !== undefined && payloadLevel > maxLevel) return false
-  
+
   if (allowedLevels !== undefined) {
     return allowedLevels.includes(payloadLevel)
   }

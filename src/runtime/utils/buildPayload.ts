@@ -1,10 +1,10 @@
 import { defu } from 'defu'
-import type { LogPayload, LoggerConfig } from '../types'
+import type { Config, LogPayload } from '../types'
 import { levelToString, normalizeLevel } from './level'
 
 export function buildPayload(
   input: LogPayload,
-  config: LoggerConfig,
+  config: Config,
 ): LogPayload {
   return {
     level: normalizeLevel(input.level),

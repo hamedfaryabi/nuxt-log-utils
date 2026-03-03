@@ -1,5 +1,3 @@
-import type { MaskCustomizer } from '../types'
-
 function defaultMask(value: string | number): string {
   const str = String(value)
   if (str.length <= 4) return '****'
@@ -10,7 +8,6 @@ export function applyMask(
   obj: any,
   mask: string[] | Record<string, any> | undefined, // allow nested objects
 ): any {
-
   if (!obj || typeof obj !== 'object') return obj
   if (!mask) return obj
 
@@ -24,25 +21,31 @@ export function applyMask(
       if (isArrayMask) {
         // Array mode: always apply default mask
         result[key] = defaultMask(String(result[key]))
-      } else {
+      }
+      else {
         const customizer = (mask as Record<string, any>)[key]
 
         if (customizer === false) {
-          // Remove the key entirely
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete result[key]
-        } else if (customizer === true) {
+        }
+        else if (customizer === true) {
           result[key] = defaultMask(String(result[key]))
-        } else if (typeof customizer === 'function') {
+        }
+        else if (typeof customizer === 'function') {
           result[key] = customizer(String(result[key]))
-        } else if (typeof customizer === 'object' && customizer !== null) {
+        }
+        else if (typeof customizer === 'object' && customizer !== null) {
           // Recurse with nested mask
           result[key] = applyMask(result[key], customizer)
-        } else {
+        }
+        else {
           // Default mask
           result[key] = defaultMask(String(result[key]))
         }
       }
-    } else if (result[key] && typeof result[key] === 'object') {
+    }
+    else if (result[key] && typeof result[key] === 'object') {
       // If the key isn't in the mask, still recurse for nested objects
       result[key] = applyMask(result[key], mask)
     }

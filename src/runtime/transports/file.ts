@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { LoggerConfig, LogPayload } from '../types'
+import type { Config, LogPayload } from '../types'
 import { resolveFilePath } from '../utils/resolveFilePath'
 
 export async function fileTransport(
   payload: LogPayload,
-  config: LoggerConfig,
+  config: Config,
 ): Promise<void> {
   if (!import.meta.server) return
   if (!config.filePath) return

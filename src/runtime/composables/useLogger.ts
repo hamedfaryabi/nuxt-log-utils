@@ -1,6 +1,5 @@
 // src/runtime/composables/useLogger.ts
-import { useRuntimeConfig } from '#imports'
-import { LogLevel, type LoggerConfig, type LogPayload, type OutputTarget } from '../types'
+import { LogLevel, type Config, type LogPayload, type OutputTarget } from '../types'
 import { resolveConfig } from '../utils/resolveConfig'
 import { shouldLog } from '../utils/level'
 import { applyMask } from '../utils/mask'
@@ -10,26 +9,27 @@ import { consoleTransport } from '../transports/console'
 import { fileTransport } from '../transports/file'
 import { apiTransport } from '../transports/api'
 
-const transports: Record<OutputTarget, (payload: LogPayload, config: LoggerConfig) => Promise<void>> = {
+const transports: Record<OutputTarget, (payload: LogPayload, config: Config) => Promise<void>> = {
   console: consoleTransport,
   file: fileTransport,
   api: apiTransport,
 } as const
 
-export function useLogger(name: string, configs?: Partial<LoggerConfig>): ReturnType<typeof _useLogger>
-export function useLogger(configs?: Partial<LoggerConfig>): ReturnType<typeof _useLogger>
+export function useLogger(name: string, configs?: Partial<Config>): ReturnType<typeof _useLogger>
+export function useLogger(configs?: Partial<Config>): ReturnType<typeof _useLogger>
 
 export function useLogger(
-  nameOrConfigs?: string | Partial<LoggerConfig>,
-  maybeConfigs?: Partial<LoggerConfig>
+  nameOrConfigs?: string | Partial<Config>,
+  maybeConfigs?: Partial<Config>,
 ) {
   let name: string | undefined
-  let configs: Partial<LoggerConfig> | undefined
+  let configs: Partial<Config> | undefined
 
   if (typeof nameOrConfigs === 'string') {
     name = nameOrConfigs
     configs = maybeConfigs
-  } else {
+  }
+  else {
     name = 'default'
     configs = nameOrConfigs
   }
@@ -37,12 +37,13 @@ export function useLogger(
   return _useLogger(name, configs)
 }
 
-function _useLogger(name?: string, configs?: Partial<LoggerConfig>) {
+function _useLogger(name?: string, configs?: Partial<Config>) {
+  // @ts-ignore
   const { $loggerConfig } = useNuxtApp()
   const globalConfig = $loggerConfig
 
   async function send(level: LogLevel, message: string, data?: Record<string, any>) {
-    const config = resolveConfig(configs || {}, globalConfig, name, level)
+    const config = resolveConfig(configs || {}, globalConfig, name ?? 'default', level)
 
     if (!shouldLog(level, config.minLevel, config.maxLevel, config.allowedLevels)) return
 
@@ -66,7 +67,7 @@ function _useLogger(name?: string, configs?: Partial<LoggerConfig>) {
       outputs.map(async (t) => {
         const transport = transports[t]
         if (transport) await transport(payload, config)
-      })
+      }),
     )
 
     if (config.afterSend) {

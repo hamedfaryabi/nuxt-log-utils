@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * RFC 5424 / Monolog log levels
  */
@@ -32,12 +33,12 @@ export interface LogPayload<dataT extends Record<string, any> = Record<string, a
 
 export interface LoggerFormatterContext<dataT extends Record<string, any>> {
   payload: LogPayload<dataT>
-  config: LoggerConfig<dataT>
+  config: Config<dataT>
 }
 
-export type LoggerMask = 
-  | string[] // flat array of keys
-  | { [key: string]: MaskCustomizer | LoggerMask } // nested object or dot-path keys
+export type LoggerMask
+  = | string[] // flat array of keys
+    | { [key: string]: MaskCustomizer | LoggerMask } // nested object or dot-path keys
 
 export interface LogLevelConfig<dataT extends Record<string, any>> {
   minLevel?: LogLevel
@@ -58,16 +59,13 @@ export interface LogLevelConfig<dataT extends Record<string, any>> {
   afterSend?: (payload: LogPayload<dataT>) => void
 }
 
-export interface LoggerConfig<dataT extends Record<string, any> = Record<string, any>> extends LogLevelConfig<dataT> {
+export interface Config<dataT extends Record<string, any> = Record<string, any>> extends LogLevelConfig<dataT> {
   /**
    * Per-level config overrides.
    * When a log is sent, if the level has a config here,
    * it is merged (with priority) over the global config.
    */
   levels?: Partial<Record<LogLevel | LogLevelKey, LogLevelConfig<dataT>>>
-  /**
-   * Named logger config overrides.
-   * Keys are logger names passed to `useLogger(name)`.
-   */
-  loggers?: Record<string, Partial<LoggerConfig<dataT>>>
 }
+
+export type LoggerConfig<dataT extends Record<string, any> = Record<string, any>> = Record<string, Partial<Config<dataT>>>

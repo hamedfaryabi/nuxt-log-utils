@@ -1,8 +1,8 @@
-import type { LoggerConfig, LogPayload } from '../types'
+import type { Config, LogPayload } from '../types'
 
 export async function apiTransport(
   payload: LogPayload,
-  config: LoggerConfig,
+  config: Config,
 ): Promise<void> {
   if (!config.apiUrl) return
 

@@ -64,14 +64,14 @@ function testPaymentLogger() {
 }
 
 function testCustomLogger() {
-  const customLogger = useLogger('analytics')
-  results.value = ['Testing custom named logger (analytics)...']
+  const customLogger = useLogger('test')
+  results.value = ['Testing custom named logger (test) from env variables...']
   customLogger.info('Page view tracked', {
     page: '/named',
     duration: 1234,
     userId: 42,
   })
-  results.value.push(`Logger name: "${customLogger.name}" — no special config, inherits global`)
+  results.value.push(`Logger name: "${customLogger.name}" — read logs from env variables`)
 }
 
 function testAllLoggers() {
