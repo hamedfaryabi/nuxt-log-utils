@@ -15,6 +15,9 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 400px; margin-top: 16px;">
+      <button @click="logDebug">
+        📗 Log DEBUG
+      </button>
       <button @click="logInfo">
         📗 Log INFO
       </button>
@@ -58,6 +61,10 @@ watch(includeMeta, (include: boolean) => {
   immediate: true,
 })
 
+function logDebug() {
+  logger.value.debug('Hello from client')
+  lastLog.value = 'Sent DEBUG via useLogger()'
+}
 function logInfo() {
   logger.value.info('Hello from client')
   lastLog.value = 'Sent INFO via useLogger()'

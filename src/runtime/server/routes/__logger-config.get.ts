@@ -7,10 +7,11 @@ export default defineEventHandler(async (event) => {
 
   if (name && typeof name === 'string') {
     const loggerConfig = await resolveConfig(name)
-
-    return buildClientConfig(loggerConfig)
+    const config = buildClientConfig(loggerConfig)
+    return config
   }
 
   const serverConfig = await resolveConfig('default')
-  return buildClientConfig(serverConfig)
+  const config = buildClientConfig(serverConfig)
+  return config
 })

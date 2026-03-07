@@ -9,6 +9,7 @@ import { consoleTransport } from '../transports/console'
 import { fileTransport } from '../transports/file'
 import { apiTransport } from '../transports/api'
 import { mergeConfigs } from '../utils/config/mergeConfigs'
+import { ref } from 'vue'
 
 const transports: Record<OutputTarget, (payload: LogPayload, config: Config) => Promise<void>> = {
   console: consoleTransport,
@@ -38,10 +39,12 @@ export function useLogger(
   return _useLogger(name, configs)
 }
 
-function _useLogger(name?: string, configs?: Partial<Config>) {
+function _useLogger(name?: string, loggerConfig?: Partial<Config>) {
   // TODO - const { $loggerConfig } = tryUseNuxtApp()
   // default configs from module options
   const defaults: Partial<LoggerConfig> = {}
+
+  const configs = ref(structuredClone(loggerConfig))
 
   // @ts-expect-error - useState is in app
   const configState = useState<ResolveReturnType | null>(`logger-config__${name ?? 'default'}`, () => null)
@@ -54,6 +57,8 @@ function _useLogger(name?: string, configs?: Partial<Config>) {
         query: { name: name ?? 'default' },
       }).then((config) => {
         configState.value = config
+      }).catch((error) => {
+        console.error(error)
       })
     }
     else {
@@ -65,9 +70,7 @@ function _useLogger(name?: string, configs?: Partial<Config>) {
 
   async function send(level: LogLevel, message: string, data?: Record<string, any>) {
     const resolved = configState.value
-
-    const config = mergeConfigs(resolved.env, resolved.json, configs ?? {}, resolved.runtime, defaults)
-
+    const config = mergeConfigs(resolved.env, resolved.json, configs.value ?? {}, resolved.runtime, defaults)
     const levelConfig = config.levels?.[level]
 
     const effectiveConfig = mergeConfigs(levelConfig || {}, config)
@@ -106,15 +109,10 @@ function _useLogger(name?: string, configs?: Partial<Config>) {
       send(level, message, data)
   }
 
-  function reset() {
-    configState.value = null
-  }
-
   return {
     name,
     send,
     create,
-    reset,
     debug: create(LogLevel.DEBUG),
     info: create(LogLevel.INFO),
     notice: create(LogLevel.NOTICE),

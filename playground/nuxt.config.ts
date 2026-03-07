@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   compatibilityDate: 'latest',
   logger: {
     default: {
-      minLevel: 200,
+      minLevel: 100,
       output: ['console'],
       includeMeta: true,
 
