@@ -1,0 +1,12 @@
+{
+  "default": {
+    "level": 100,
+    "criticalMeta": ["user.token"],
+    "meta": {
+      "user": {
+        "token": "secret-token",
+        "ip": "127.0.0.1"
+      }
+    }
+  }
+}

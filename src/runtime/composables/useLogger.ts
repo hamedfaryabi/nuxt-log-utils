@@ -1,6 +1,6 @@
 // src/runtime/composables/useLogger.ts
-import { LogLevel, type Config, type LogPayload, type OutputTarget } from '../types'
-import { resolveConfig } from '../utils/resolveConfig'
+import { LogLevel, type Config, type LoggerConfig, type LogPayload, type OutputTarget } from '../types'
+import { resolveConfig, type ResolveReturnType } from '../utils/resolveConfig'
 import { shouldLog } from '../utils/level'
 import { applyMask } from '../utils/mask'
 import { buildPayload } from '../utils/buildPayload'
@@ -8,6 +8,7 @@ import { buildMeta } from '../utils/buildMeta'
 import { consoleTransport } from '../transports/console'
 import { fileTransport } from '../transports/file'
 import { apiTransport } from '../transports/api'
+import { mergeConfigs } from '../utils/config/mergeConfigs'
 
 const transports: Record<OutputTarget, (payload: LogPayload, config: Config) => Promise<void>> = {
   console: consoleTransport,
@@ -38,40 +39,65 @@ export function useLogger(
 }
 
 function _useLogger(name?: string, configs?: Partial<Config>) {
-  // @ts-ignore
-  const { $loggerConfig } = useNuxtApp()
-  const globalConfig = $loggerConfig
+  // TODO - const { $loggerConfig } = tryUseNuxtApp()
+  // default configs from module options
+  const defaults: Partial<LoggerConfig> = {}
+
+  // @ts-expect-error - useState is in app
+  const configState = useState<ResolveReturnType | null>(`logger-config__${name ?? 'default'}`, () => null)
+  configState.value = null
+
+  if (!configState.value) {
+    if (import.meta.client) {
+      $fetch<ResolveReturnType>('/__logger-config', {
+        method: 'GET',
+        query: { name: name ?? 'default' },
+      }).then((config) => {
+        configState.value = config
+      })
+    }
+    else {
+      resolveConfig(name ?? 'default').then((config) => {
+        configState.value = config
+      })
+    }
+  }
 
   async function send(level: LogLevel, message: string, data?: Record<string, any>) {
-    const config = resolveConfig(configs || {}, globalConfig, name ?? 'default', level)
+    const resolved = configState.value
 
-    if (!shouldLog(level, config.minLevel, config.maxLevel, config.allowedLevels)) return
+    const config = mergeConfigs(resolved.env, resolved.json, configs ?? {}, resolved.runtime, defaults)
 
-    let payload = buildPayload({ level, message, data, meta: buildMeta() }, config)
+    const levelConfig = config.levels?.[level]
 
-    if (config.beforeSend) {
-      const result = await config.beforeSend(payload)
+    const effectiveConfig = mergeConfigs(levelConfig || {}, config)
+    if (!shouldLog(level, effectiveConfig.minLevel, effectiveConfig.maxLevel, effectiveConfig.allowedLevels)) return
+
+    let payload = buildPayload({ level, message, data, meta: buildMeta() }, effectiveConfig)
+
+    if (effectiveConfig.beforeSend) {
+      const result = effectiveConfig.beforeSend(payload)
       if (result === false) return
       if (result) payload = result
     }
 
-    payload = applyMask(payload, config.mask)
+    payload = applyMask(payload, effectiveConfig.mask)
 
-    if (config.formatter) {
-      payload = config.formatter({ payload, config })
+    if (effectiveConfig.formatter) {
+      payload = effectiveConfig.formatter({ payload, config: effectiveConfig })
     }
 
-    const outputs: OutputTarget[] = config.output ?? ['console']
+    const outputs: OutputTarget[] = effectiveConfig.output ?? ['console']
 
     await Promise.all(
       outputs.map(async (t) => {
         const transport = transports[t]
-        if (transport) await transport(payload, config)
+        if (transport) await transport(payload, effectiveConfig)
       }),
     )
 
-    if (config.afterSend) {
-      await config.afterSend(payload)
+    if (effectiveConfig.afterSend) {
+      effectiveConfig.afterSend(payload)
     }
   }
 
@@ -80,10 +106,15 @@ function _useLogger(name?: string, configs?: Partial<Config>) {
       send(level, message, data)
   }
 
+  function reset() {
+    configState.value = null
+  }
+
   return {
     name,
     send,
     create,
+    reset,
     debug: create(LogLevel.DEBUG),
     info: create(LogLevel.INFO),
     notice: create(LogLevel.NOTICE),

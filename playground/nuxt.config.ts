@@ -2,19 +2,17 @@ export default defineNuxtConfig({
   modules: ['nuxt-log'],
   devtools: { enabled: true },
   runtimeConfig: {
-    public: {
-      logger: {
-        default: {
-          output: ['console'],
-          includeMeta: true,
-        },
+    logger: {
+      default: {
+        output: ['console'],
+        includeMeta: true,
       },
     },
   },
   compatibilityDate: 'latest',
   logger: {
     default: {
-      minLevel: 100,
+      minLevel: 200,
       output: ['console'],
       includeMeta: true,
 

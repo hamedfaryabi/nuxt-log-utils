@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * RFC 5424 / Monolog log levels
  */
@@ -54,6 +53,7 @@ export interface LogLevelConfig<dataT extends Record<string, any>> {
   fileLogPeriod?: FileLogPeriod
   meta?: Record<string, any>
   includeMeta?: boolean
+  criticalMeta?: string[]
   formatter?: (ctx: LoggerFormatterContext<dataT>) => any
   beforeSend?: (payload: LogPayload<dataT>) => LogPayload<dataT> | false | undefined
   afterSend?: (payload: LogPayload<dataT>) => void

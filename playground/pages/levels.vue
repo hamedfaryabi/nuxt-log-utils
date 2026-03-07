@@ -24,10 +24,18 @@
       </button>
     </div>
 
-    <div v-if="results.length" style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;">
+    <div
+      v-if="results.length"
+      style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;"
+    >
       <strong>Results:</strong>
       <ul>
-        <li v-for="(r, i) in results" :key="i">{{ r }}</li>
+        <li
+          v-for="(r, i) in results"
+          :key="i"
+        >
+          {{ r }}
+        </li>
       </ul>
     </div>
   </div>
@@ -39,8 +47,8 @@ import { LogLevel } from '../../src/runtime/types'
 const results = ref<string[]>([])
 
 function testMinLevel() {
-  const logger = useLogger({
-    minLevel: LogLevel.ERROR
+  const logger = useLogger('minLogger', {
+    minLevel: LogLevel.ERROR,
   })
 
   results.value = ['Testing minLevel = ERROR (400)...']
@@ -54,7 +62,7 @@ function testMinLevel() {
 
 function testMaxLevel() {
   const logger = useLogger({
-    maxLevel: LogLevel.WARNING
+    maxLevel: LogLevel.WARNING,
   })
 
   results.value = ['Testing maxLevel = WARNING (300)...']
@@ -68,7 +76,7 @@ function testMaxLevel() {
 
 function testAllowedLevels() {
   const logger = useLogger({
-    allowedLevels: [LogLevel.DEBUG, LogLevel.CRITICAL]
+    allowedLevels: [LogLevel.DEBUG, LogLevel.CRITICAL],
   })
   results.value = ['Testing allowedLevels = [DEBUG, CRITICAL]...']
   logger.debug('Should APPEAR (in allowedLevels)')
@@ -81,7 +89,7 @@ function testAllowedLevels() {
 function testRange() {
   const logger = useLogger({
     minLevel: LogLevel.DEBUG,
-    maxLevel: LogLevel.WARNING
+    maxLevel: LogLevel.WARNING,
   })
 
   results.value = ['Testing minLevel=INFO, maxLevel=WARNING...']
@@ -96,7 +104,7 @@ function testRangeWithAllowed() {
   const logger = useLogger({
     minLevel: LogLevel.INFO,
     maxLevel: LogLevel.WARNING,
-    allowedLevels: [LogLevel.NOTICE, LogLevel.ERROR]
+    allowedLevels: [LogLevel.NOTICE, LogLevel.ERROR],
   })
 
   results.value = ['Testing minLevel=INFO, maxLevel=WARNING, allowedLevels=[NOTICE, ERROR]...']

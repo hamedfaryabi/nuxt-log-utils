@@ -5,37 +5,58 @@
 
     <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 400px;">
       <label for="include-meta">
-        <input type="checkbox" v-model="includeMeta" id="include-meta"/>
+        <input
+          id="include-meta"
+          v-model="includeMeta"
+          type="checkbox"
+        >
         Include meta
       </label>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 400px; margin-top: 16px;">
-      <button @click="logInfo">📗 Log INFO</button>
-      <button @click="logWarning">📙 Log WARNING</button>
-      <button @click="logError">📕 Log ERROR</button>
-      <button @click="logWithData">📦 Log with Data</button>
-      <button @click="logAllLevels">🔁 Log All Levels</button>
+      <button @click="logInfo">
+        📗 Log INFO
+      </button>
+      <button @click="logWarning">
+        📙 Log WARNING
+      </button>
+      <button @click="logError">
+        📕 Log ERROR
+      </button>
+      <button @click="logWithData">
+        📦 Log with Data
+      </button>
+      <button @click="logAllLevels">
+        🔁 Log All Levels
+      </button>
     </div>
 
-    <div v-if="lastLog" style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+    <div
+      v-if="lastLog"
+      style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;"
+    >
       <strong>Last action:</strong> {{ lastLog }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const logger = computed(()=>{
-  if(includeMeta.value){
-    return useLogger()
-  }
+import { watch } from 'vue'
 
-  return useLogger({includeMeta: false})
-})
+const logger = ref()
 
 const { $logger } = useNuxtApp()
 const lastLog = ref('')
 const includeMeta = ref<boolean>(true)
+
+watch(includeMeta, (include: boolean) => {
+  logger.value = useLogger({
+    includeMeta: include,
+  })
+}, {
+  immediate: true,
+})
 
 function logInfo() {
   logger.value.info('Hello from client')
