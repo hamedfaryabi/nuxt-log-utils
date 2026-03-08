@@ -10,6 +10,7 @@ import { fileTransport } from '../transports/file'
 import { apiTransport } from '../transports/api'
 import { mergeConfigs } from '../utils/config/mergeConfigs'
 import { ref } from 'vue'
+import defu from 'defu'
 
 const transports: Record<OutputTarget, (payload: LogPayload, config: Config) => Promise<void>> = {
   console: consoleTransport,
@@ -40,37 +41,54 @@ export function useLogger(
 }
 
 function _useLogger(name?: string, loggerConfig?: Partial<Config>) {
-  // TODO - const { $loggerConfig } = tryUseNuxtApp()
   // default configs from module options
-  const defaults: Partial<LoggerConfig> = {}
+  // @ts-expect-error - useNuxtApp is in app
+  const nuxtApp = useNuxtApp()
+  const defaults: Partial<LoggerConfig> = nuxtApp?.$loggerConfig ?? {}
 
-  const configs = ref(structuredClone(loggerConfig))
+  const defaultConfigs = name ? defaults[name] || {} : {}
+  const configs = ref(defu(loggerConfig, {}))
+
+  const cacheKey = `logger-config__${name ?? 'default'}`
 
   // @ts-expect-error - useState is in app
-  const configState = useState<ResolveReturnType | null>(`logger-config__${name ?? 'default'}`, () => null)
-  configState.value = null
+  const configState = useState<ResolveReturnType | null>(cacheKey, () => null)
 
-  if (!configState.value) {
+  nuxtApp._loggerPromises = nuxtApp._loggerPromises || {}
+
+  if (!configState.value && !nuxtApp._loggerPromises[cacheKey]) {
     if (import.meta.client) {
-      $fetch<ResolveReturnType>('/__logger-config', {
+      nuxtApp._loggerPromises[cacheKey] = $fetch<ResolveReturnType>('/__logger-config', {
         method: 'GET',
         query: { name: name ?? 'default' },
       }).then((config) => {
         configState.value = config
+        return config
       }).catch((error) => {
-        console.error(error)
+        console.error('[useLogger] Fetch error:', error)
+        return null
       })
     }
     else {
-      resolveConfig(name ?? 'default').then((config) => {
+      nuxtApp._loggerPromises[cacheKey] = resolveConfig(name ?? 'default').then((config) => {
         configState.value = config
+        return config
       })
     }
   }
 
   async function send(level: LogLevel, message: string, data?: Record<string, any>) {
+    if (!configState.value && nuxtApp._loggerPromises[cacheKey]) {
+      await nuxtApp._loggerPromises[cacheKey]
+    }
+
     const resolved = configState.value
-    const config = mergeConfigs(resolved.env, resolved.json, configs.value ?? {}, resolved.runtime, defaults)
+    if (!resolved) {
+      console.warn(`[useLogger] Could not load config for "${name ?? 'default'}". Log aborted.`)
+      return
+    }
+
+    const config = mergeConfigs(resolved.env, resolved.json, configs.value ?? {}, resolved.runtime, defaultConfigs)
     const levelConfig = config.levels?.[level]
 
     const effectiveConfig = mergeConfigs(levelConfig || {}, config)
