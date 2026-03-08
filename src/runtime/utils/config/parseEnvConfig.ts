@@ -1,87 +1,112 @@
 // Utility for parsing environment variables into a nested config object.
 //
 // Env vars expected format (for logger `myLogger`):
-
-//   LOGGER_MY-LOGGER_MIN-LEVEL=info
-//   LOGGER_MY-LOGGER_OUTPUT=console,file
+//
+//   LOGGER_MY_LOGGER_MIN_LEVEL=info
+//   LOGGER_MY_LOGGER_OUTPUT=console,file
 //     - `output` becomes an array of `OutputTarget` (`console`, `file`, `api`).
-//   LOGGER_MY-LOGGER_APIURL=https://example.com
+//   LOGGER_MY_LOGGER_API_URL=https://example.com
 //     - sets `apiUrl` for API transport
-//   LOGGER_MY-LOGGER_FILEPATH=/var/log/my.log
+//   LOGGER_MY_LOGGER_FILE_PATH=/var/log/my.log
 //     - sets `filePath` for file transport
-//   LOGGER_MY-LOGGER_FILELOGPERIOD=daily
+//   LOGGER_MY_LOGGER_FILE_LOG_PERIOD=daily
 //     - sets `fileLogPeriod` (one of `daily` | `monthly` | `yearly`)
-//   LOGGER_MY-LOGGER_MASK=email,ip
+//   LOGGER_MY_LOGGER_MASK=email,ip
 //     - comma-separated values become an array for `mask`
-//   LOGGER_MY-LOGGER_LEVELS__ERROR__MIN-LEVEL=400
-//     - per-level override: `levels.error.minLevel` (use `__` to nest)
+//   LOGGER_MY_LOGGER_LEVELS__ERROR__MIN_LEVEL=400
+//     - per-level override: `levels.error.minLevel`
 //
 // Notes:
-// - The prefix is `LOGGER_<LOGGER_NAME>_` (logger name uppercased).
-// - Double underscores (`__`) indicate nesting levels and are converted to
-//   nested object keys (the parser lowercases path segments).
-// - `parseValue` converts `true`/`false` to booleans, numeric-looking strings
-//   to numbers, and comma-separated strings to arrays. Other strings remain
-//   as-is, keeping environment-driven config simple and predictable.
+// - Prefix format: LOGGER_<LOGGER_NAME>_
+// - Logger names normalize to uppercase snake case.
+// - Double underscore (`__`) indicates nested object levels.
+// - Single underscores are converted to camelCase in the resulting config.
+//
 
 type EnvConfig = Record<string, any>
 
 /**
- * Set a value deeply on an object given a path of keys.
- *
- * This mutates `obj`. Path parts are expected to be strings already
- * normalized (e.g. lowercased by the caller).
+ * Safely sets a deeply nested value on an object.
  */
 function setDeep(obj: any, path: string[], value: any) {
   let current = obj
+
   for (let i = 0; i < path.length - 1; i++) {
     const key = path[i] as string
-    if (!current[key]) current[key] = {}
+
+    if (typeof current[key] !== 'object' || current[key] === null) {
+      current[key] = {}
+    }
+
     current = current[key]
   }
-  const idx = path[path.length - 1] as string
-  current[idx] = value
+
+  current[path[path.length - 1] as string] = value
 }
 
 /**
- * Parse a raw environment variable string into a JS value.
- *
- * Behavior:
- * - 'true' / 'false' -> boolean
- * - numeric strings -> number (NaN-safe via Number())
- * - comma-separated -> array of trimmed strings
- * - otherwise -> original string
+ * Convert ENV string value into a proper JS value.
  */
-function parseValue(val: string): any {
+function parseValue(value: string): any {
+  const val = value.trim()
+
+  if (val === '') return ''
+
   if (val === 'true') return true
   if (val === 'false') return false
-  if (!Number.isNaN(Number(val))) return Number(val)
-  if (val.includes(',')) return val.split(',').map(v => v.trim())
+
+  // array
+  if (val.includes(',')) {
+    return val.split(',').map(v => v.trim())
+  }
+
+  // number (only if it does not start with 0)
+  // eslint-disable-next-line regexp/no-unused-capturing-group
+  if (/^-?[1-9]\d*(\.\d+)?$/.test(val) || val === '0') {
+    return Number(val)
+  }
+
   return val
 }
 
 /**
- * Read process.env and build a namespaced config object for a logger.
+ * Convert ENV key segment to camelCase.
  *
- * Example: calling `parseEnvConfig('app')` will scan for keys starting with
- * `LOGGER_APP_` and convert them into a nested object using `__` as a
- * separator. Keys are lowercased to produce predictable object keys.
+ * MIN_LEVEL -> minLevel
+ * FILE_LOG_PERIOD -> fileLogPeriod
+ */
+function normalizePathPart(part: string): string {
+  const segments = part.toLowerCase().split('_')
+
+  return segments
+    .map((seg, i) =>
+      i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1),
+    )
+    .join('')
+}
+
+/**
+ * Normalize logger name to ENV-safe format.
+ *
+ * myLogger  -> MY_LOGGER
+ * my-logger -> MY_LOGGER
+ * my_logger -> MY_LOGGER
+ */
+function normalizeLoggerName(name: string): string {
+  return name
+    .replace(/-/g, '_')
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .toUpperCase()
+}
+
+/**
+ * Parse environment variables into a nested config object.
  */
 export function parseEnvConfig(loggerName: string): EnvConfig {
   const result: EnvConfig = {}
 
-  // In environments without `process` (e.g. some browser bundles during
-  // build-time), bail out with an empty config.
-  if (typeof process === 'undefined') return result
-
-  // Normalize logger name so that different naming styles map to the
-  // same env prefix. Examples that should resolve to the same prefix:
-  //   myLogger, my_logger, my-logger -> LOGGER_MY-LOGGER_
-  function normalizeLoggerName(name: string) {
-    // replace underscores with hyphens, convert camelCase boundaries to
-    // hyphens (e.g. myLogger -> my-logger), then uppercase for prefix.
-    const withHyphens = name.replace(/_/g, '-').replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    return withHyphens.toUpperCase()
+  if (typeof process === 'undefined' || !process.env) {
+    return result
   }
 
   const prefix = `LOGGER_${normalizeLoggerName(loggerName)}_`
@@ -89,25 +114,19 @@ export function parseEnvConfig(loggerName: string): EnvConfig {
   for (const key in process.env) {
     if (!key.startsWith(prefix)) continue
 
-    // Remove the prefix and split on double underscore to derive nesting.
-    const rawPath = key.replace(prefix, '')
+    const rawPath = key.slice(prefix.length)
 
-    // Convert each path segment to a predictable object key.
-    // - Lowercase the segment
-    // - Convert hyphen-separated names to camelCase so that env like
-    //   `MIN-LEVEL` becomes `minLevel` in the resulting object.
-    function normalizePathPart(part: string) {
-      const lower = part.toLowerCase()
-      if (lower.includes('-')) {
-        return lower.split('-').map((seg, i) => i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)).join('')
-      }
-      return lower
-    }
+    const path = rawPath
+      .split('__')
+      .map(normalizePathPart)
 
-    const pathParts = rawPath.split('__').map(p => normalizePathPart(p))
+    const rawValue = process.env[key]
 
-    const value = parseValue(process.env[key] as string)
-    setDeep(result, pathParts, value)
+    if (rawValue === undefined) continue
+
+    const value = parseValue(rawValue)
+
+    setDeep(result, path, value)
   }
 
   return result

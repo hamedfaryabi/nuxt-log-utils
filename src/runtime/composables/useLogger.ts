@@ -92,6 +92,7 @@ function _useLogger(name?: string, loggerConfig?: Partial<Config>) {
     const levelConfig = config.levels?.[level]
 
     const effectiveConfig = mergeConfigs(levelConfig || {}, config)
+    if (effectiveConfig.enabled === false) return
     if (!shouldLog(level, effectiveConfig.minLevel, effectiveConfig.maxLevel, effectiveConfig.allowedLevels)) return
 
     let payload = buildPayload({ level, message, data, meta: buildMeta() }, effectiveConfig)

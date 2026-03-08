@@ -40,6 +40,7 @@ export type LoggerMask
     | { [key: string]: MaskCustomizer | LoggerMask } // nested object or dot-path keys
 
 export interface LogLevelConfig<dataT extends Record<string, any>> {
+  enabled?: boolean
   minLevel?: LogLevel
   maxLevel?: LogLevel
   /**
