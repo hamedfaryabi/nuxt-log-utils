@@ -8,7 +8,7 @@ import {
   addServerHandler,
 } from '@nuxt/kit'
 import type { LoggerConfig } from './runtime/types'
-import { serialize } from 'serialize-javascript'
+import serialize from 'serialize-javascript'
 
 export default defineNuxtModule({
   meta: {
