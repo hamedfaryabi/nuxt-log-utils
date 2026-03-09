@@ -71,7 +71,7 @@ function logInfo() {
 }
 
 function logWarning() {
-  $logger.warning('Warning from plugin logger using $logger')
+  logger.value.warning('Warning from plugin logger using $logger')
   lastLog.value = 'Sent WARNING via $logger plugin'
 }
 

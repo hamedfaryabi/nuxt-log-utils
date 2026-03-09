@@ -9,7 +9,15 @@ import type { ResolveReturnType } from '../resolveConfig'
 import { stripCriticalMeta } from './stripCriticalMeta'
 
 export function buildClientConfig(serverConfigs: ResolveReturnType) {
-  const clone = structuredClone(serverConfigs)
+  const clone: Record<string, any> = {}
+  for (const [key, value] of Object.entries(serverConfigs)) {
+    if (value && typeof value === 'object') {
+      clone[key] = { ...value }
+    }
+    else {
+      clone[key] = value
+    }
+  }
   for (const conf of Object.values(clone)) {
     if (conf && typeof conf === 'object') {
       delete conf.fileLogPeriod

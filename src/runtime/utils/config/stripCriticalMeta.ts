@@ -18,7 +18,7 @@ export function stripCriticalMeta(
   meta: Record<string, any>,
   critical: string[] = [],
 ) {
-  const clone = structuredClone(meta)
+  const clone = { ...meta }
 
   for (const path of critical) {
     deleteDeep(clone, path.split('.'))

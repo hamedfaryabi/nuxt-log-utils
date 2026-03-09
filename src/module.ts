@@ -8,7 +8,7 @@ import {
   addServerHandler,
 } from '@nuxt/kit'
 import type { LoggerConfig } from './runtime/types'
-import serialize from 'serialize-javascript'
+import { serialize } from 'serialize-javascript'
 
 export default defineNuxtModule({
   meta: {
@@ -16,8 +16,16 @@ export default defineNuxtModule({
     configKey: 'logger',
   },
 
-  setup(options: Partial<LoggerConfig>, _nuxt) {
+  setup(options: Partial<LoggerConfig>, nuxt) {
     const resolver = createResolver(import.meta.url)
+    if (!nuxt.options.runtimeConfig.private) {
+      nuxt.options.runtimeConfig['private'] = {
+        loggerModuleOptions: '',
+      }
+    }
+    nuxt.options.runtimeConfig.private['loggerModuleOptions'] = serialize(options, {
+      unsafe: true,
+    })
 
     const template = addTemplate({
       filename: 'nuxt-log.plugin.mjs',
@@ -42,7 +50,7 @@ export default defineNuxtModule({
     })
     addPlugin(resolver.resolve('runtime/plugin'))
     addImportsDir(resolver.resolve('runtime/composables'))
-    addServerImportsDir(resolver.resolve('runtime/composables'))
+    addServerImportsDir(resolver.resolve('runtime/server/utils'))
     addServerHandler({
       route: '/__logger/[name]',
       handler: resolver.resolve('runtime/server/routes/__logger/[name].post.ts'),
