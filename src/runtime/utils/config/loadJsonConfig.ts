@@ -1,4 +1,3 @@
-// import { createResolver } from '@nuxt/kit'
 
 let cached: Record<string, any> | null = null
 export async function loadJsonConfig(): Promise<Record<string, any>> {
@@ -10,12 +9,6 @@ export async function loadJsonConfig(): Promise<Record<string, any>> {
     return cached
   }
   try {
-    // Require Node built-ins at runtime to avoid bundler-time externalization.
-    // Using `require` here keeps these imports out of the module graph for
-
-    // client bundles.
-    // const { existsSync, readFileSync } = require('node:fs')
-    // const { resolve } = require('node:path')
     const fs = await import('node:fs')
     const path = await import('node:path')
 

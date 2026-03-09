@@ -58,7 +58,7 @@ export default defineNuxtModule({
 
     addServerHandler({
       route: '/__logger-config',
-      handler: resolver.resolve('runtime/server/routes/__logger-config.get'),
+      handler: resolver.resolve('runtime/server/routes/__logger-config.get.ts'),
     })
   },
 })

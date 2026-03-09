@@ -1,10 +1,7 @@
-/*
-Remove:
-  - filePath
-  - fileLogPeriod
-  - apiUrl (replace)
-*/
-
+/**
+ * Strips server-only fields (filePath, fileLogPeriod, criticalMeta) from resolved
+ * configs and rewrites apiUrl to the internal proxy route for client-side use.
+ */
 import type { ResolveReturnType } from '../resolveConfig'
 import { stripCriticalMeta } from './stripCriticalMeta'
 
@@ -26,10 +23,10 @@ export function buildClientConfig(serverConfigs: ResolveReturnType) {
       if (conf.apiUrl)
         conf.apiUrl = '/__logger'
 
-      const stripedMeta = stripCriticalMeta(conf.meta || {}, conf.criticalMeta ?? [])
+      const strippedMeta = stripCriticalMeta(conf.meta || {}, conf.criticalMeta ?? [])
 
-      if (stripedMeta && Object.keys(stripedMeta).length > 0) {
-        conf.meta = stripedMeta
+      if (strippedMeta && Object.keys(strippedMeta).length > 0) {
+        conf.meta = strippedMeta
       }
       else {
         delete conf.meta

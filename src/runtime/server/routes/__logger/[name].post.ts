@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, getRouterParam } from 'h3'
+import { defineEventHandler, readBody, getRouterParam, createError } from 'h3'
 import { resolveConfig } from '../../../utils/resolveConfig'
 import { mergeConfigs } from '../../../utils/config/mergeConfigs'
 
@@ -7,16 +7,16 @@ export default defineEventHandler(async (event) => {
   const name = getRouterParam(event, 'name')
 
   if (!name || typeof name !== 'string') {
-    return { error: 'Invalid logger name' }
+    throw createError({ statusCode: 400, statusMessage: 'Invalid logger name' })
   }
 
   if (!body || typeof body !== 'object') {
-    return { error: 'Invalid payload' }
+    throw createError({ statusCode: 400, statusMessage: 'Invalid payload' })
   }
 
   const size = Buffer.byteLength(JSON.stringify(body))
   if (size > 1024 * 1024) {
-    return { error: 'Payload too large' }
+    throw createError({ statusCode: 413, statusMessage: 'Payload too large' })
   }
 
   const loggerConfig = await resolveConfig(name)
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   const url = config.apiUrl
   if (!url) {
-    return { error: 'No API URL configured' }
+    throw createError({ statusCode: 500, statusMessage: 'No API URL configured' })
   }
 
   try {

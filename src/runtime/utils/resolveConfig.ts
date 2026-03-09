@@ -1,7 +1,6 @@
 import type { Config } from '../types'
 import { loadJsonConfig } from './config/loadJsonConfig'
 import { parseEnvConfig } from './config/parseEnvConfig'
-// import { loadJsonConfig } from '#imports'
 
 export interface ResolveReturnType extends Record<string, Partial<Config>> {
   env: Partial<Config>
@@ -9,7 +8,7 @@ export interface ResolveReturnType extends Record<string, Partial<Config>> {
   runtime: Partial<Config>
 }
 /**
- * resolve and merge configs and return a effective config
+ * Resolves env, JSON, and runtime configs for a named logger.
  * @param loggerName name of the logger
  * @returns Config
  */

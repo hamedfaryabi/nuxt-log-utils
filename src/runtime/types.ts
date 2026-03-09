@@ -43,9 +43,6 @@ export interface LogLevelConfig<dataT extends Record<string, any>> {
   enabled?: boolean
   minLevel?: LogLevel
   maxLevel?: LogLevel
-  /**
-   * **Notice:** If `allowedLevels` is set, it takes full control
-   */
   allowedLevels?: LogLevel[]
   mask?: LoggerMask
   output?: OutputTarget[]
