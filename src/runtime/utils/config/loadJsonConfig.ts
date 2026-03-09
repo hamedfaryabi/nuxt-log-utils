@@ -1,4 +1,3 @@
-
 let cached: Record<string, any> | null = null
 export async function loadJsonConfig(): Promise<Record<string, any>> {
   if (import.meta.client) return {}

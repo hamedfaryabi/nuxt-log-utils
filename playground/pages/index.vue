@@ -49,7 +49,6 @@ import { watch } from 'vue'
 
 const logger = ref()
 
-const { $logger } = useNuxtApp()
 const lastLog = ref('')
 const includeMeta = ref<boolean>(true)
 

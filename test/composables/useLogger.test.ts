@@ -5,6 +5,8 @@ import type { ResolveReturnType } from '../../src/runtime/utils/resolveConfig'
 import { consoleTransport } from '../../src/runtime/transports/console'
 import { apiTransport } from '../../src/runtime/transports/api'
 
+import { createLoggerInstance, type StateProvider } from '../../src/runtime/utils/loggerCore'
+
 vi.mock('../../src/runtime/transports/console', () => ({
   consoleTransport: vi.fn().mockResolvedValue(undefined),
 }))
@@ -14,8 +16,6 @@ vi.mock('../../src/runtime/transports/file', () => ({
 vi.mock('../../src/runtime/transports/api', () => ({
   apiTransport: vi.fn().mockResolvedValue(undefined),
 }))
-
-import { createLoggerInstance, type StateProvider } from '../../src/runtime/utils/loggerCore'
 
 function makeStateProvider(config: Partial<Config>): StateProvider {
   const resolved: ResolveReturnType = {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { LogLevel } from '../../src/runtime/types'
 import { mergeConfigs } from '../../src/runtime/utils/config/mergeConfigs'
 import { parseEnvConfig } from '../../src/runtime/utils/config/parseEnvConfig'

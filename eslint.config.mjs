@@ -15,10 +15,11 @@ export default createConfigForNuxt({
     ],
   },
 }).append(
-    {
-      rules: {
-        // disable explicit any warnings across the project
-        '@typescript-eslint/no-explicit-any': 'off',
-      },
-    }
-  )
+  {
+    rules: {
+      // disable explicit any warnings across the project
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-dynamic-delete': 'off',
+    },
+  },
+)

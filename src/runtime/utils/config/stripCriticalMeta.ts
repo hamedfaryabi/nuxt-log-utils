@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-dynamic-delete */
 // Supports dot notation deep removal
 
 function deepClone<T>(obj: T): T {
