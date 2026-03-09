@@ -2,7 +2,7 @@ import { consola } from 'consola'
 import { LogLevel, type Config, type LogPayload } from '../types'
 
 const levelMap: Record<LogLevel, number> = {
-  [LogLevel.DEBUG]: 4,
+  [LogLevel.DEBUG]: 3,
   [LogLevel.INFO]: 3,
   [LogLevel.NOTICE]: 3,
   [LogLevel.WARNING]: 1,

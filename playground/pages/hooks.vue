@@ -15,10 +15,18 @@
       </button>
     </div>
 
-    <div v-if="results.length" style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;">
+    <div
+      v-if="results.length"
+      style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;"
+    >
       <strong>Results:</strong>
       <ul>
-        <li v-for="(r, i) in results" :key="i">{{ r }}</li>
+        <li
+          v-for="(r, i) in results"
+          :key="i"
+        >
+          {{ r }}
+        </li>
       </ul>
     </div>
   </div>
@@ -34,8 +42,8 @@ function testBeforeSendModify() {
       payload.message += ' (modified)'
       payload.data = { ...payload.data, modified: true }
 
-      return payload;
-    }
+      return payload
+    },
   })
   logger.info('Original message', { source: 'hooks-page' })
   results.value.push('Check console — the beforeSend hook in nuxt.config can modify the payload before transport')
@@ -44,9 +52,9 @@ function testBeforeSendModify() {
 function testBeforeSendCancel() {
   results.value = ['Testing beforeSend — cancelling log...']
   const logger = useLogger({
-    beforeSend(){
+    beforeSend() {
       return false
-    }
+    },
   })
   logger.info('This log might be cancelled if beforeSend returns false')
   results.value.push('If beforeSend returns false, nothing appears in console')
@@ -57,7 +65,7 @@ function testAfterSend() {
   const logger = useLogger({
     afterSend() {
       console.log('AfterSend fired!')
-    }
+    },
   })
   logger.info('Log with afterSend hook', { action: 'test' })
   results.value.push('afterSend fires after all transports complete — useful for metrics/analytics')

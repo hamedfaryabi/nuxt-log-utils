@@ -26,7 +26,6 @@ export function applyMask(
         const customizer = (mask as Record<string, any>)[key]
 
         if (customizer === false) {
-          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete result[key]
         }
         else if (customizer === true) {

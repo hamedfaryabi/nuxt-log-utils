@@ -5,7 +5,7 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
-A flexible, extensible logger module for Nuxt 3/4 with data masking, file rotation, per-level config, lifecycle hooks, and multiple transport targets.
+A flexible, extensible logger module for Nuxt 3/4 with data masking, file rotation, per-level config, critical-meta stripping, lifecycle hooks, and multiple transport targets.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
 - [🏀 &nbsp;Online Playground](https://stackblitz.com/github/hamedfaryabi/nuxt-log?file=playground%2Fapp.vue)
@@ -18,9 +18,11 @@ A flexible, extensible logger module for Nuxt 3/4 with data masking, file rotati
 - 📁 **File log rotation** — Daily, monthly, or yearly log file suffixes
 - ⚙️ **Per-level config** — Override output, masking, and hooks for specific log levels
 - 🏷️ **Named loggers** — Create scoped loggers with independent configuration
-- 🌍 **Environment overrides** — Configure loggers via `NUXT_PUBLIC_LOGGER_*` env vars
+- 🌍 **Environment overrides** — Configure loggers via `LOGGER_*` env vars
 - 🪝 **Lifecycle hooks** — `beforeSend`, `afterSend`, and `formatter` for full control
-- 🔌 **Auto-imported** — Available as `useLogger()` composable and `$logger` plugin helper
+- 🛡️ **Critical meta stripping** — Automatically strip sensitive metadata keys on the client
+- 📄 **JSON config file** — Optional `logger.config.json` for file-based configuration
+- 🔌 **Auto-imported** — Available as `useLogger()` composable on both client and server
 - 💪 **Fully typed** — Written in TypeScript with exported types
 
 ## Quick Setup
@@ -47,6 +49,14 @@ export default defineNuxtConfig({
 
 That's it! The module auto-registers the `useLogger()` composable and `$logger` plugin — no additional setup required. ✨
 
+## Config Resolution Order
+
+Configs are merged with the following priority (highest first):
+
+```
+env vars > JSON file > local overrides > runtime config > module options > defaults
+```
+
 ## Usage
 
 ### Basic Logging
@@ -68,15 +78,6 @@ const paymentLogger = useLogger('payment')
 
 authLogger.info('Login successful')
 paymentLogger.error('Charge declined')
-```
-
-### Plugin Access
-
-The logger is also available via `$logger` in the Nuxt app context:
-
-```ts
-const { $logger } = useNuxtApp()
-$logger.info('Hello from plugin')
 ```
 
 ### Available Methods
@@ -102,45 +103,37 @@ logCritical('System overload', { cpu: 99 })
 
 ## Configuration
 
-Configure the logger in `nuxt.config.ts` under the `logger` key in `runtimeConfig.public`:
+Configure the logger in `nuxt.config.ts` under the `logger` module option key:
 
 ```ts
 export default defineNuxtConfig({
   modules: ['nuxt-log'],
-  runtimeConfig: {
-    public: {
-      logger: {
-        // Global config
-        minLevel: 200,        // LogLevel.INFO
-        output: ['console'],
-        includeMeta: true,
+  logger: {
+    default: {
+      minLevel: 200,        // LogLevel.INFO
+      output: ['console'],
+      includeMeta: true,
 
-        // Per-level overrides
-        levels: {
-          400: {               // LogLevel.ERROR
-            output: ['console', 'file'],
-            filePath: 'logs/errors.log',
-            fileLogPeriod: 'daily',
-          },
-          500: {               // LogLevel.CRITICAL
-            output: ['console', 'api'],
-            apiUrl: '/api/logs',
-          },
+      levels: {
+        400: {               // LogLevel.ERROR
+          output: ['console', 'file'],
+          filePath: 'logs/errors.log',
+          fileLogPeriod: 'daily',
         },
-
-        // Named logger overrides
-        loggers: {
-          auth: {
-            minLevel: 100,    // LogLevel.DEBUG
-            mask: ['password', 'token'],
-          },
-          payment: {
-            output: ['console', 'file'],
-            filePath: 'logs/payment.log',
-            fileLogPeriod: 'monthly',
-          },
+        500: {               // LogLevel.CRITICAL
+          output: ['console', 'api'],
+          apiUrl: '/api/logs',
         },
       },
+    },
+    auth: {
+      minLevel: 100,        // LogLevel.DEBUG
+      mask: ['password', 'token'],
+    },
+    payment: {
+      output: ['console', 'file'],
+      filePath: 'logs/payment.log',
+      fileLogPeriod: 'monthly',
     },
   },
 })
@@ -160,11 +153,12 @@ export default defineNuxtConfig({
 | `apiUrl` | `string` | `undefined` | Endpoint URL for API transport |
 | `includeMeta` | `boolean` | `true` | Include auto-generated metadata |
 | `meta` | `Record<string, any>` | `undefined` | Additional metadata merged into every log |
+| `criticalMeta` | `string[]` | `undefined` | Meta keys stripped on client (dot-notation supported) |
+| `enabled` | `boolean` | `undefined` | Set to `false` to disable this logger |
 | `formatter` | `(ctx) => any` | `undefined` | Custom payload formatter |
 | `beforeSend` | `(payload) => payload \| false` | `undefined` | Hook before sending — return `false` to cancel |
 | `afterSend` | `(payload) => void` | `undefined` | Hook after successful send |
 | `levels` | `Record<LogLevel, LogLevelConfig>` | `undefined` | Per-level config overrides |
-| `loggers` | `Record<string, LoggerConfig>` | `undefined` | Named logger config overrides |
 
 ## Data Masking
 
@@ -244,21 +238,23 @@ The payload is sent as JSON in the request body using `$fetch`.
 Override config for named loggers at runtime using environment variables:
 
 ```
-NUXT_PUBLIC_LOGGER_{NAME}_{KEY}=value
+LOGGER_{NAME}_{KEY}=value
 ```
 
 Examples:
 
 ```bash
-NUXT_PUBLIC_LOGGER_AUTH_MINLEVEL=100
-NUXT_PUBLIC_LOGGER_AUTH_OUTPUT=console,file
-NUXT_PUBLIC_LOGGER_PAYMENT_FILEPATH=logs/payment.log
+LOGGER_DEFAULT_MIN_LEVEL=100
+LOGGER_AUTH_OUTPUT=console,file
+LOGGER_PAYMENT_FILE_PATH=logs/payment.log
+LOGGER_DEFAULT_MASK=email,ip
+LOGGER_DEFAULT_LEVELS__ERROR__MIN_LEVEL=400
 ```
 
 Env overrides take the highest priority in the config merge chain:
 
 ```
-env vars > named logger config > global config > defaults
+env vars > JSON file > local overrides > runtime config > module options > defaults
 ```
 
 ## Lifecycle Hooks
@@ -303,21 +299,37 @@ Transform the final payload shape before dispatch:
 }
 ```
 
+## JSON Config File
+
+You can also configure loggers via a `logger.config.json` file in the project root (server-side only):
+
+```json
+{
+  "default": {
+    "minLevel": 100,
+    "criticalMeta": ["user.token"],
+    "meta": {
+      "user": {
+        "token": "secret-token"
+      }
+    }
+  }
+}
+```
+
 ## Metadata
 
 Each log automatically includes metadata:
 
 ```json
 {
-  "timestamp": "2026-02-19T12:00:00.000Z",
-  "isServer": false,
-  "path": "/dashboard"
+  "timestamp": "2026-03-09T12:00:00.000Z",
+  "isServer": false
 }
 ```
 
 - `timestamp` — ISO 8601 timestamp
 - `isServer` — Whether the log was created on the server
-- `path` — Current route path (client-side only)
 
 Disable auto-metadata with `includeMeta: false`, or merge additional fields with the `meta` option.
 
@@ -340,6 +352,17 @@ import type {
 } from 'nuxt-log'
 ```
 
+## Server-Side Usage
+
+On the server (Nitro), `useLogger` is auto-imported and works identically:
+
+```ts
+export default defineEventHandler(async () => {
+  const logger = useLogger('default')
+  await logger.info('Server request handled')
+})
+```
+
 ## Compatibility
 
 | nuxt-log | Nuxt |
@@ -347,6 +370,7 @@ import type {
 | `>=0.1.0` | `^3.0.0 \|\| ^4.0.0` |
 
 > **Note:** File transport is server-side only. Console and API transports work on both client and server.
+> **Note:** On the client, `apiUrl` is automatically rewritten to the internal `/__logger` proxy route for security.
 
 ## Development
 

@@ -1,6 +1,6 @@
 {
   "name": "nuxt-log",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A flexible, extensible logger module for Nuxt 4 with masking, file rotation, per-level config, and transport extensions.",
   "license": "MIT",
   "type": "module",
@@ -32,6 +32,7 @@
     }
   },
   "main": "./dist/module.mjs",
+  "types": "./dist/types.d.mts",
   "typesVersions": {
     "*": {
       ".": [
@@ -69,8 +70,6 @@
     "@nuxt/devtools": "^3.2.1",
     "@nuxt/eslint-config": "^1.15.1",
     "@nuxt/module-builder": "^1.0.2",
-    "@nuxt/schema": "^4.3.1",
-    "@nuxt/test-utils": "^4.0.0",
     "@types/node": "latest",
     "changelogen": "^0.6.2",
     "eslint": "^10.0.0",

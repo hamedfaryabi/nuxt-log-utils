@@ -21,10 +21,18 @@
       </button>
     </div>
 
-    <div v-if="results.length" style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;">
+    <div
+      v-if="results.length"
+      style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;"
+    >
       <strong>Results:</strong>
       <ul>
-        <li v-for="(r, i) in results" :key="i">{{ r }}</li>
+        <li
+          v-for="(r, i) in results"
+          :key="i"
+        >
+          {{ r }}
+        </li>
       </ul>
     </div>
   </div>

@@ -1,7 +1,7 @@
 import type { LoggerMeta } from '../types'
 
 /**
- * Builds default metadata
+ * Builds default metadata (timestamp + server flag).
  */
 export function buildMeta(): LoggerMeta {
   const meta: LoggerMeta = {

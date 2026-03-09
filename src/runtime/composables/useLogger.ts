@@ -1,27 +1,17 @@
-// src/runtime/composables/useLogger.ts
-import { LogLevel, type Config, type LogPayload, type OutputTarget } from '../types'
-import { resolveConfig } from '../utils/resolveConfig'
-import { shouldLog } from '../utils/level'
-import { applyMask } from '../utils/mask'
-import { buildPayload } from '../utils/buildPayload'
-import { buildMeta } from '../utils/buildMeta'
-import { consoleTransport } from '../transports/console'
-import { fileTransport } from '../transports/file'
-import { apiTransport } from '../transports/api'
+import type { Config, LoggerConfig } from '../types'
+import { resolveConfig, type ResolveReturnType } from '../utils/resolveConfig'
+import { createLoggerInstance, type LoggerInstance, type StateProvider } from '../utils/loggerCore'
+import type { LoggerConfigMap } from '../plugin'
+import { ref } from 'vue'
+import defu from 'defu'
 
-const transports: Record<OutputTarget, (payload: LogPayload, config: Config) => Promise<void>> = {
-  console: consoleTransport,
-  file: fileTransport,
-  api: apiTransport,
-} as const
-
-export function useLogger(name: string, configs?: Partial<Config>): ReturnType<typeof _useLogger>
-export function useLogger(configs?: Partial<Config>): ReturnType<typeof _useLogger>
+export function useLogger(name: string, configs?: Partial<Config>): LoggerInstance
+export function useLogger(configs?: Partial<Config>): LoggerInstance
 
 export function useLogger(
   nameOrConfigs?: string | Partial<Config>,
   maybeConfigs?: Partial<Config>,
-) {
+): LoggerInstance {
   let name: string | undefined
   let configs: Partial<Config> | undefined
 
@@ -37,60 +27,56 @@ export function useLogger(
   return _useLogger(name, configs)
 }
 
-function _useLogger(name?: string, configs?: Partial<Config>) {
-  // @ts-ignore
-  const { $loggerConfig } = useNuxtApp()
-  const globalConfig = $loggerConfig
+function _useLogger(name?: string, loggerConfig?: Partial<Config>): LoggerInstance {
+  const resolvedName = name ?? 'default'
 
-  async function send(level: LogLevel, message: string, data?: Record<string, any>) {
-    const config = resolveConfig(configs || {}, globalConfig, name ?? 'default', level)
+  // @ts-expect-error - useNuxtApp is in app
+  const nuxtApp = useNuxtApp()
+  const defaults: Partial<LoggerConfig> = nuxtApp?.$loggerConfig ?? {}
+  const defaultConfigs = name ? defaults[name] || {} : {}
 
-    if (!shouldLog(level, config.minLevel, config.maxLevel, config.allowedLevels)) return
+  const localOverrides = ref(defu(loggerConfig, {}))
 
-    let payload = buildPayload({ level, message, data, meta: buildMeta() }, config)
+  // @ts-expect-error - useState is in app
+  const configMap = useState<LoggerConfigMap>('logger-config-map', () => ({}))
 
-    if (config.beforeSend) {
-      const result = await config.beforeSend(payload)
-      if (result === false) return
-      if (result) payload = result
-    }
+  nuxtApp._loggerPromises = nuxtApp._loggerPromises || {}
 
-    payload = applyMask(payload, config.mask)
-
-    if (config.formatter) {
-      payload = config.formatter({ payload, config })
-    }
-
-    const outputs: OutputTarget[] = config.output ?? ['console']
-
-    await Promise.all(
-      outputs.map(async (t) => {
-        const transport = transports[t]
-        if (transport) await transport(payload, config)
-      }),
-    )
-
-    if (config.afterSend) {
-      await config.afterSend(payload)
-    }
+  const stateProvider: StateProvider = {
+    getResolved: () => configMap.value[resolvedName] ?? null,
+    setResolved: (value) => {
+      configMap.value = { ...configMap.value, [resolvedName]: value }
+    },
+    getPromise: () => nuxtApp._loggerPromises[resolvedName] ?? null,
+    setPromise: (promise) => { nuxtApp._loggerPromises[resolvedName] = promise },
+    getLocalOverrides: () => localOverrides.value ?? {},
+    getDefaultConfigs: () => defaultConfigs,
   }
 
-  function create(level: LogLevel) {
-    return (message: string, data?: any) =>
-      send(level, message, data)
+  if (!stateProvider.getResolved() && !stateProvider.getPromise()) {
+    let loadPromise: Promise<ResolveReturnType | null>
+
+    if (import.meta.client) {
+      loadPromise = $fetch<ResolveReturnType>('/__logger-config', {
+        method: 'GET',
+        query: { name: resolvedName },
+      }).then((config) => {
+        stateProvider.setResolved(config)
+        return config
+      }).catch((error) => {
+        console.error('[useLogger] Fetch error:', error)
+        return null
+      })
+    }
+    else {
+      loadPromise = resolveConfig(resolvedName).then((config) => {
+        stateProvider.setResolved(config)
+        return config
+      })
+    }
+
+    stateProvider.setPromise(loadPromise)
   }
 
-  return {
-    name,
-    send,
-    create,
-    debug: create(LogLevel.DEBUG),
-    info: create(LogLevel.INFO),
-    notice: create(LogLevel.NOTICE),
-    warning: create(LogLevel.WARNING),
-    error: create(LogLevel.ERROR),
-    critical: create(LogLevel.CRITICAL),
-    alert: create(LogLevel.ALERT),
-    emergency: create(LogLevel.EMERGENCY),
-  }
+  return createLoggerInstance(resolvedName, stateProvider)
 }

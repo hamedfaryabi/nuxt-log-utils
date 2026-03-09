@@ -15,16 +15,25 @@
       </button>
     </div>
 
-    <div v-if="loading" style="margin-top: 1rem; color: #666;">
+    <div
+      v-if="loading"
+      style="margin-top: 1rem; color: #666;"
+    >
       Loading...
     </div>
 
-    <div v-if="response" style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;">
+    <div
+      v-if="response"
+      style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;"
+    >
       <strong>Server Response:</strong>
       <pre style="white-space: pre-wrap; word-break: break-all;">{{ JSON.stringify(response, null, 2) }}</pre>
     </div>
 
-    <div v-if="error" style="margin-top: 1rem; padding: 1rem; background: #ffe0e0; border-radius: 8px;">
+    <div
+      v-if="error"
+      style="margin-top: 1rem; padding: 1rem; background: #ffe0e0; border-radius: 8px;"
+    >
       <strong>Error:</strong> {{ error }}
     </div>
   </div>

@@ -9,7 +9,7 @@
       <NuxtLink to="/named">Named Loggers</NuxtLink>
       <NuxtLink to="/server-test">Server Test</NuxtLink>
     </nav>
-    <hr />
+    <hr>
     <NuxtPage />
   </div>
 </template>

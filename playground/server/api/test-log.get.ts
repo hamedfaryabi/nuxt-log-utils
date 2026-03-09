@@ -1,5 +1,7 @@
 export default defineEventHandler(async () => {
-  const logger = useLogger()
+  const logger = useLogger({
+    output: ['console', 'file'],
+  })
 
   await logger.info('Server-side info log', {
     source: 'api-route',

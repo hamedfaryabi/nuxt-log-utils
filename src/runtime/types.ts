@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * RFC 5424 / Monolog log levels
  */
@@ -41,11 +40,9 @@ export type LoggerMask
     | { [key: string]: MaskCustomizer | LoggerMask } // nested object or dot-path keys
 
 export interface LogLevelConfig<dataT extends Record<string, any>> {
+  enabled?: boolean
   minLevel?: LogLevel
   maxLevel?: LogLevel
-  /**
-   * **Notice:** If `allowedLevels` is set, it takes full control
-   */
   allowedLevels?: LogLevel[]
   mask?: LoggerMask
   output?: OutputTarget[]
@@ -54,6 +51,7 @@ export interface LogLevelConfig<dataT extends Record<string, any>> {
   fileLogPeriod?: FileLogPeriod
   meta?: Record<string, any>
   includeMeta?: boolean
+  criticalMeta?: string[]
   formatter?: (ctx: LoggerFormatterContext<dataT>) => any
   beforeSend?: (payload: LogPayload<dataT>) => LogPayload<dataT> | false | undefined
   afterSend?: (payload: LogPayload<dataT>) => void

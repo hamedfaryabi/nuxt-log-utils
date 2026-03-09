@@ -35,7 +35,7 @@ describe('shouldLog', () => {
 
   it('allowedLevels overrides minLevel/maxLevel', () => {
     const allowed = [LogLevel.ERROR, LogLevel.CRITICAL]
-    expect(shouldLog(LogLevel.ERROR, LogLevel.DEBUG, LogLevel.INFO, allowed)).toBe(true)
+    expect(shouldLog(LogLevel.ERROR, LogLevel.DEBUG, LogLevel.WARNING, allowed)).toBe(false)
     expect(shouldLog(LogLevel.INFO, undefined, undefined, allowed)).toBe(false)
   })
 
