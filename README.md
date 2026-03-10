@@ -29,11 +29,12 @@ A flexible, extensible logger module for Nuxt 3/4 with data masking, file rotati
 
 Install the module:
 
+<!--
 ```bash
 npx nuxi module add nuxt-log
 ```
 
-Or manually:
+Or manually: -->
 
 ```bash
 npm install nuxt-log
@@ -43,18 +44,18 @@ Then add it to `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['nuxt-log'],
-})
+    modules: ["nuxt-log"],
+});
 ```
 
-That's it! The module auto-registers the `useLogger()` composable and `$logger` plugin — no additional setup required. ✨
+That's it! The module auto-registers the `useLogger()` composable — no additional setup required. ✨
 
 ## Config Resolution Order
 
 Configs are merged with the following priority (highest first):
 
 ```
-env vars > JSON file > local overrides > runtime config > module options > defaults
+env vars > JSON config file > local overrides > runtime config > module options > defaults
 ```
 
 ## Usage
@@ -63,42 +64,42 @@ env vars > JSON file > local overrides > runtime config > module options > defau
 
 ```vue
 <script setup>
-const logger = useLogger()
+const logger = useLogger();
 
-logger.info('User signed in', { userId: 123 })
-logger.error('Payment failed', { orderId: 'abc', amount: 99.99 })
+logger.info("User signed in", { userId: 123 });
+logger.error("Payment failed", { orderId: "abc", amount: 99.99 });
 </script>
 ```
 
 ### Named Loggers
 
 ```ts
-const authLogger = useLogger('auth')
-const paymentLogger = useLogger('payment')
+const authLogger = useLogger("auth");
+const paymentLogger = useLogger("payment");
 
-authLogger.info('Login successful')
-paymentLogger.error('Charge declined')
+authLogger.info("Login successful");
+paymentLogger.error("Charge declined");
 ```
 
 ### Available Methods
 
-| Method | Level Value |
-|---|---|
-| `logger.debug(message, data?)` | 100 |
-| `logger.info(message, data?)` | 200 |
-| `logger.notice(message, data?)` | 250 |
-| `logger.warning(message, data?)` | 300 |
-| `logger.error(message, data?)` | 400 |
-| `logger.critical(message, data?)` | 500 |
-| `logger.alert(message, data?)` | 550 |
-| `logger.emergency(message, data?)` | 600 |
+| Method                             | Level Value |
+| ---------------------------------- | ----------- |
+| `logger.debug(message, data?)`     | 100         |
+| `logger.info(message, data?)`      | 200         |
+| `logger.notice(message, data?)`    | 250         |
+| `logger.warning(message, data?)`   | 300         |
+| `logger.error(message, data?)`     | 400         |
+| `logger.critical(message, data?)`  | 500         |
+| `logger.alert(message, data?)`     | 550         |
+| `logger.emergency(message, data?)` | 600         |
 
 You can also create custom level shortcuts:
 
 ```ts
-const logger = useLogger()
-const logCritical = logger.create(LogLevel.CRITICAL)
-logCritical('System overload', { cpu: 99 })
+const logger = useLogger();
+const logCritical = logger.create(LogLevel.CRITICAL);
+logCritical("System overload", { cpu: 99 });
 ```
 
 ## Configuration
@@ -107,58 +108,60 @@ Configure the logger in `nuxt.config.ts` under the `logger` module option key:
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['nuxt-log'],
-  logger: {
-    default: {
-      minLevel: 200,        // LogLevel.INFO
-      output: ['console'],
-      includeMeta: true,
+    modules: ["nuxt-log"],
+    logger: {
+        default: {
+            minLevel: 200, // LogLevel.INFO
+            output: ["console"],
+            includeMeta: true,
 
-      levels: {
-        400: {               // LogLevel.ERROR
-          output: ['console', 'file'],
-          filePath: 'logs/errors.log',
-          fileLogPeriod: 'daily',
+            levels: {
+                400: {
+                    // LogLevel.ERROR
+                    output: ["console", "file"],
+                    filePath: "logs/errors.log",
+                    fileLogPeriod: "daily",
+                },
+                500: {
+                    // LogLevel.CRITICAL
+                    output: ["console", "api"],
+                    apiUrl: "/api/logs",
+                },
+            },
         },
-        500: {               // LogLevel.CRITICAL
-          output: ['console', 'api'],
-          apiUrl: '/api/logs',
+        auth: {
+            minLevel: 100, // LogLevel.DEBUG
+            mask: ["password", "token"],
         },
-      },
+        payment: {
+            output: ["console", "file"],
+            filePath: "logs/payment.log",
+            fileLogPeriod: "monthly",
+        },
     },
-    auth: {
-      minLevel: 100,        // LogLevel.DEBUG
-      mask: ['password', 'token'],
-    },
-    payment: {
-      output: ['console', 'file'],
-      filePath: 'logs/payment.log',
-      fileLogPeriod: 'monthly',
-    },
-  },
-})
+});
 ```
 
 ### Config Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `minLevel` | `LogLevel` | `LogLevel.INFO` | Minimum level to log |
-| `maxLevel` | `LogLevel` | `undefined` | Maximum level to log |
-| `allowedLevels` | `LogLevel[]` | `undefined` | Explicit allowlist (overrides min/max) |
-| `output` | `OutputTarget[]` | `['console']` | Transport targets: `'console'`, `'file'`, `'api'` |
-| `mask` | `string[] \| Record<string, MaskCustomizer>` | `undefined` | Fields to mask in log data |
-| `filePath` | `string` | `undefined` | File path for file transport |
-| `fileLogPeriod` | `FileLogPeriod` | `undefined` | Rotation period: `'daily'`, `'monthly'`, `'yearly'` |
-| `apiUrl` | `string` | `undefined` | Endpoint URL for API transport |
-| `includeMeta` | `boolean` | `true` | Include auto-generated metadata |
-| `meta` | `Record<string, any>` | `undefined` | Additional metadata merged into every log |
-| `criticalMeta` | `string[]` | `undefined` | Meta keys stripped on client (dot-notation supported) |
-| `enabled` | `boolean` | `undefined` | Set to `false` to disable this logger |
-| `formatter` | `(ctx) => any` | `undefined` | Custom payload formatter |
-| `beforeSend` | `(payload) => payload \| false` | `undefined` | Hook before sending — return `false` to cancel |
-| `afterSend` | `(payload) => void` | `undefined` | Hook after successful send |
-| `levels` | `Record<LogLevel, LogLevelConfig>` | `undefined` | Per-level config overrides |
+| Option          | Type                                         | Default         | Description                                           |
+| --------------- | -------------------------------------------- | --------------- | ----------------------------------------------------- |
+| `minLevel`      | `LogLevel`                                   | `LogLevel.INFO` | Minimum level to log                                  |
+| `maxLevel`      | `LogLevel`                                   | `undefined`     | Maximum level to log                                  |
+| `allowedLevels` | `LogLevel[]`                                 | `undefined`     | Allowed levels list to log                            |
+| `output`        | `OutputTarget[]`                             | `['console']`   | Transport targets: `'console'`, `'file'`, `'api'`     |
+| `mask`          | `string[] \| Record<string, MaskCustomizer>` | `undefined`     | Fields to mask in log data                            |
+| `filePath`      | `string`                                     | `undefined`     | File path for file transport                          |
+| `fileLogPeriod` | `FileLogPeriod`                              | `undefined`     | Rotation period: `'daily'`, `'monthly'`, `'yearly'`   |
+| `apiUrl`        | `string`                                     | `undefined`     | Endpoint URL for API transport                        |
+| `includeMeta`   | `boolean`                                    | `true`          | Include auto-generated metadata                       |
+| `meta`          | `Record<string, any>`                        | `undefined`     | Additional metadata merged into every log             |
+| `criticalMeta`  | `string[]`                                   | `undefined`     | Meta keys stripped on client (dot-notation supported) |
+| `enabled`       | `boolean`                                    | `undefined`     | Set to `false` to disable this logger                 |
+| `formatter`     | `(ctx) => any`                               | `undefined`     | Custom payload formatter                              |
+| `beforeSend`    | `(payload) => payload \| false`              | `undefined`     | Hook before sending — return `false` to cancel        |
+| `afterSend`     | `(payload) => void`                          | `undefined`     | Hook after successful send                            |
+| `levels`        | `Record<LogLevel, LogLevelConfig>`           | `undefined`     | Per-level config overrides                            |
 
 ## Data Masking
 
@@ -168,12 +171,12 @@ Provide an array of field names. Matched fields are masked with the pattern `xx*
 
 ```ts
 {
-  mask: ['mobile', 'email', 'ssn']
+    mask: ["mobile", "email", "ssn"];
 }
 ```
 
 ```ts
-logger.info('User data', { mobile: '09123456789', name: 'Alice' })
+logger.info("User data", { mobile: "09123456789", name: "Alice" });
 // → { mobile: '09****89', name: 'Alice' }
 ```
 
@@ -193,7 +196,7 @@ Provide an object to use custom mask functions or remove fields entirely:
 ```
 
 ```ts
-logger.info('Auth', { mobile: '09123456789', access_token: 'secret123' })
+logger.info("Auth", { mobile: "09123456789", access_token: "secret123" });
 // → { mobile: '0912****' }   (access_token removed)
 ```
 
@@ -213,12 +216,12 @@ The file transport writes JSON lines to disk (server-side only):
 
 Rotation suffixes are inserted before the file extension:
 
-| Period | Example Output |
-|---|---|
-| `daily` | `logs/app-2026-02-19.log` |
-| `monthly` | `logs/app-2026-02.log` |
-| `yearly` | `logs/app-2026.log` |
-| `undefined` | `logs/app.log` |
+| Period      | Example Output            |
+| ----------- | ------------------------- |
+| `daily`     | `logs/app-2026-02-19.log` |
+| `monthly`   | `logs/app-2026-02.log`    |
+| `yearly`    | `logs/app-2026.log`       |
+| `undefined` | `logs/app.log`            |
 
 ## API Transport
 
@@ -265,10 +268,10 @@ Intercept and modify the payload before it is sent to transports. Return `false`
 
 ```ts
 {
-  beforeSend: (payload) => {
-    if (payload.message.includes('health-check')) return false
-    return { ...payload, message: `[MyApp] ${payload.message}` }
-  }
+    beforeSend: (payload) => {
+        if (payload.message.includes("health-check")) return false;
+        return { ...payload, message: `[MyApp] ${payload.message}` };
+    };
 }
 ```
 
@@ -278,9 +281,9 @@ Run side effects after a log is successfully sent:
 
 ```ts
 {
-  afterSend: (payload) => {
-    // e.g. increment a metrics counter
-  }
+    afterSend: (payload) => {
+        // e.g. increment a metrics counter
+    };
 }
 ```
 
@@ -290,30 +293,30 @@ Transform the final payload shape before dispatch:
 
 ```ts
 {
-  formatter: ({ payload, config }) => {
-    return {
-      ...payload,
-      message: payload.message.toUpperCase(),
-    }
-  }
+    formatter: ({ payload, config }) => {
+        return {
+            ...payload,
+            message: payload.message.toUpperCase(),
+        };
+    };
 }
 ```
 
 ## JSON Config File
 
-You can also configure loggers via a `logger.config.json` file in the project root (server-side only):
+You can also configure loggers via a `logger.config.json` file in the project root:
 
 ```json
 {
-  "default": {
-    "minLevel": 100,
-    "criticalMeta": ["user.token"],
-    "meta": {
-      "user": {
-        "token": "secret-token"
-      }
+    "default": {
+        "minLevel": 100,
+        "criticalMeta": ["user.token"],
+        "meta": {
+            "user": {
+                "token": "secret-token"
+            }
+        }
     }
-  }
 }
 ```
 
@@ -323,8 +326,8 @@ Each log automatically includes metadata:
 
 ```json
 {
-  "timestamp": "2026-03-09T12:00:00.000Z",
-  "isServer": false
+    "timestamp": "2026-03-09T12:00:00.000Z",
+    "isServer": false
 }
 ```
 
@@ -339,17 +342,17 @@ All types are exported from the package:
 
 ```ts
 import type {
-  LogLevel,
-  LogLevelKey,
-  LoggerConfig,
-  LogPayload,
-  LoggerMeta,
-  OutputTarget,
-  FileLogPeriod,
-  MaskCustomizer,
-  LogLevelConfig,
-  LoggerFormatterContext,
-} from 'nuxt-log'
+    LogLevel,
+    LogLevelKey,
+    LoggerConfig,
+    LogPayload,
+    LoggerMeta,
+    OutputTarget,
+    FileLogPeriod,
+    MaskCustomizer,
+    LogLevelConfig,
+    LoggerFormatterContext,
+} from "nuxt-log";
 ```
 
 ## Server-Side Usage
@@ -358,15 +361,15 @@ On the server (Nitro), `useLogger` is auto-imported and works identically:
 
 ```ts
 export default defineEventHandler(async () => {
-  const logger = useLogger('default')
-  await logger.info('Server request handled')
-})
+    const logger = useLogger("default");
+    await logger.info("Server request handled");
+});
 ```
 
 ## Compatibility
 
-| nuxt-log | Nuxt |
-|---|---|
+| nuxt-log  | Nuxt                 |
+| --------- | -------------------- |
 | `>=0.1.0` | `^3.0.0 \|\| ^4.0.0` |
 
 > **Note:** File transport is server-side only. Console and API transports work on both client and server.
@@ -403,14 +406,12 @@ pnpm run release
 [MIT](./LICENSE)
 
 <!-- Badges -->
+
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-log/latest.svg?style=flat&colorA=020420&colorB=00DC82
 [npm-version-href]: https://npmjs.com/package/nuxt-log
-
 [npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-log.svg?style=flat&colorA=020420&colorB=00DC82
 [npm-downloads-href]: https://npm.chart.dev/nuxt-log
-
 [license-src]: https://img.shields.io/npm/l/nuxt-log.svg?style=flat&colorA=020420&colorB=00DC82
 [license-href]: https://npmjs.com/package/nuxt-log
-
 [nuxt-src]: https://img.shields.io/badge/Nuxt-020420?logo=nuxt
 [nuxt-href]: https://nuxt.com
