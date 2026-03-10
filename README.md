@@ -33,12 +33,11 @@ A flexible, extensible logger module for Nuxt 3/4 with data masking, file rotati
 
 Install the module:
 
-<!--
 ```bash
 npx nuxi module add nuxt-log-utils
 ```
 
-Or manually: -->
+Or manually:
 
 ```bash
 npm install nuxt-log-utils
@@ -372,9 +371,9 @@ export default defineEventHandler(async () => {
 
 ## Compatibility
 
-| nuxt-log-utils  | Nuxt                 |
-| --------- | -------------------- |
-| `>=0.1.0` | `^3.0.0 \|\| ^4.0.0` |
+| nuxt-log-utils | Nuxt                 |
+| -------------- | -------------------- |
+| `>=0.1.0`      | `^3.0.0 \|\| ^4.0.0` |
 
 > **Note:** File transport is server-side only. Console and API transports work on both client and server.
 > **Note:** On the client, `apiUrl` is automatically rewritten to the internal `/__logger` proxy route for security.
