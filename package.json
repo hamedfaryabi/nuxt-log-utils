@@ -1,10 +1,31 @@
 {
-  "name": "nuxt-log",
-  "version": "1.0.0",
-  "description": "My new Nuxt module",
-  "repository": "your-org/my-module",
+  "name": "nuxt-log-utils",
+  "version": "0.2.0",
+  "description": "A flexible, extensible logger module for Nuxt 3/4 with masking, file rotation, per-level config, and transport extensions.",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
+  "author": "Hamed Faryabi <hamed.faryabi9@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hamedfaryabi/nuxt-log-utils.git"
+  },
+  "homepage": "https://github.com/hamedfaryabi/nuxt-log-utils#readme",
+  "bugs": {
+    "url": "https://github.com/hamedfaryabi/nuxt-log-utils/issues"
+  },
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "logger",
+    "logging",
+    "nuxt4",
+    "nuxt3",
+    "log",
+    "transport",
+    "masking",
+    "consola"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types.d.mts",
@@ -12,18 +33,9 @@
     }
   },
   "main": "./dist/module.mjs",
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/types.d.mts"
-      ]
-    }
-  },
+  "types": "./dist/types.d.mts",
   "files": [
     "dist"
-  ],
-  "workspaces": [
-    "playground"
   ],
   "scripts": {
     "prepack": "nuxt-module-build build",
@@ -39,14 +51,16 @@
   "dependencies": {
     "@nuxt/kit": "^4.3.1",
     "consola": "^3.4.2",
-    "defu": "^6.1.4"
+    "defu": "^6.1.4",
+    "serialize-javascript": "^7.0.3"
+  },
+  "peerDependencies": {
+    "nuxt": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "^3.2.1",
     "@nuxt/eslint-config": "^1.15.1",
     "@nuxt/module-builder": "^1.0.2",
-    "@nuxt/schema": "^4.3.1",
-    "@nuxt/test-utils": "^4.0.0",
     "@types/node": "latest",
     "changelogen": "^0.6.2",
     "eslint": "^10.0.0",

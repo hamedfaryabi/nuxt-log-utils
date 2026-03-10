@@ -14,7 +14,12 @@ export default createConfigForNuxt({
       './playground',
     ],
   },
-})
-  .append(
-    // your custom flat config here...
-  )
+}).append(
+  {
+    rules: {
+      // disable explicit any warnings across the project
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-dynamic-delete': 'off',
+    },
+  },
+)

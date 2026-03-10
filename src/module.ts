@@ -4,19 +4,61 @@ import {
   addImportsDir,
   createResolver,
   addServerImportsDir,
+  addTemplate,
+  addServerHandler,
 } from '@nuxt/kit'
+import type { LoggerConfig } from './runtime/types'
+import serialize from 'serialize-javascript'
 
 export default defineNuxtModule({
   meta: {
-    name: 'nuxt-log',
-    configKey: 'nuxtLog',
+    name: 'nuxt-log-utils',
+    configKey: 'logger',
   },
 
-  setup() {
+  setup(options: Partial<LoggerConfig>, nuxt) {
     const resolver = createResolver(import.meta.url)
+    if (!nuxt.options.runtimeConfig.private) {
+      nuxt.options.runtimeConfig['private'] = {
+        loggerModuleOptions: '',
+      }
+    }
+    nuxt.options.runtimeConfig.private['loggerModuleOptions'] = serialize(options, {
+      unsafe: true,
+    })
 
+    const template = addTemplate({
+      filename: 'nuxt-log-utils.plugin.mjs',
+      getContents: () => `
+        import { defineNuxtPlugin } from '#app'
+        const loggerConfig = ${serialize(options, {
+          unsafe: true,
+        })}
+
+        export default defineNuxtPlugin(() => {
+          return {
+            provide: {
+              loggerConfig
+            }
+          }
+        })
+      `,
+    })
+
+    addPlugin({
+      src: template.dst,
+    })
     addPlugin(resolver.resolve('runtime/plugin'))
     addImportsDir(resolver.resolve('runtime/composables'))
-    addServerImportsDir(resolver.resolve('runtime/composables'))
+    addServerImportsDir(resolver.resolve('runtime/server/utils'))
+    addServerHandler({
+      route: '/__logger/[name]',
+      handler: resolver.resolve('runtime/server/routes/__logger/[name].post.ts'),
+    })
+
+    addServerHandler({
+      route: '/__logger-config',
+      handler: resolver.resolve('runtime/server/routes/__logger-config.get.ts'),
+    })
   },
 })

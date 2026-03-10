@@ -1,11 +1,18 @@
-import type { LogPayload } from '../types'
+import type { Config, LogPayload } from '../types'
 
 export async function apiTransport(
   payload: LogPayload,
-  apiUrl: string,
-) {
-  await $fetch(apiUrl, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  })
+  config: Config,
+): Promise<void> {
+  if (!config.apiUrl) return
+
+  try {
+    await $fetch(config.apiUrl, {
+      method: 'POST',
+      body: payload,
+    })
+  }
+  catch (error) {
+    console.error('[nuxt-log-utils] API transport error:', error)
+  }
 }

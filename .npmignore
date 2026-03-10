@@ -1,0 +1,18 @@
+# Source & dev-only directories
+src/
+test/
+playground/
+logs/
+.github/
+.vscode/
+.nuxt/
+
+# Config & dev files
+logger.config.json
+tsconfig.json
+eslint.config.mjs
+pnpm-workspace.yaml
+pnpm-lock.yaml
+.editorconfig
+.npmrc
+CHANGELOG.md

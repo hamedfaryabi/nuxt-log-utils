@@ -1,16 +1,24 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { LogPayload } from '../types'
+import type { Config, LogPayload } from '../types'
+import { resolveFilePath } from '../utils/resolveFilePath'
 
 export async function fileTransport(
   payload: LogPayload,
-  filePath: string,
-) {
+  config: Config,
+): Promise<void> {
   if (!import.meta.server) return
+  if (!config.filePath) return
 
-  const fullPath = path.resolve(process.cwd(), filePath)
-  const line = JSON.stringify(payload) + '\n'
+  try {
+    const resolved = resolveFilePath(config.filePath, config.fileLogPeriod)
+    const fullPath = path.resolve(process.cwd(), resolved)
+    const line = JSON.stringify(payload) + '\n'
 
-  await fs.mkdir(path.dirname(fullPath), { recursive: true })
-  await fs.appendFile(fullPath, line)
+    await fs.mkdir(path.dirname(fullPath), { recursive: true })
+    await fs.appendFile(fullPath, line)
+  }
+  catch (error) {
+    console.error('[nuxt-log-utils] File transport error:', error)
+  }
 }

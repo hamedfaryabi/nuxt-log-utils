@@ -1,11 +1,10 @@
 import { defu } from 'defu'
-import type { LogPayload, LoggerConfig } from '../types'
-import { buildMeta } from './buildMeta'
+import type { Config, LogPayload } from '../types'
 import { levelToString, normalizeLevel } from './level'
 
 export function buildPayload(
   input: LogPayload,
-  config: LoggerConfig,
+  config: Config,
 ): LogPayload {
   return {
     level: normalizeLevel(input.level),
@@ -13,6 +12,6 @@ export function buildPayload(
     data: input.data,
     meta: config.includeMeta === false
       ? input.meta
-      : defu(input.meta, buildMeta(), config.meta),
+      : defu(input.meta, config.meta),
   }
 }
