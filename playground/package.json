@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "nuxt-log-playground",
+  "name": "nuxt-log-utils-playground",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
@@ -8,7 +8,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "nuxt-log": "latest",
+    "nuxt-log-utils": "latest",
     "nuxt": "^4.3.1"
   }
 }

@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     })
   }
   catch (error) {
-    console.error('[nuxt-log] API transport error:', error)
+    console.error('[nuxt-log-utils] API transport error:', error)
   }
 
   return { ok: true }

@@ -1,6 +1,6 @@
 <template>
   <div style="font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem;">
-    <h1>🪵 nuxt-log Playground</h1>
+    <h1>🪵 nuxt-log-utils Playground</h1>
     <nav style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
       <NuxtLink to="/">Home</NuxtLink>
       <NuxtLink to="/levels">Levels</NuxtLink>

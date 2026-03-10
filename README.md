@@ -1,4 +1,8 @@
-# nuxt-log
+# nuxt-log-utils
+
+<p align="center">
+  <img src="./assets/logo.png" alt="nuxt-log-utils logo" width="200" />
+</p>
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
@@ -8,7 +12,7 @@
 A flexible, extensible logger module for Nuxt 3/4 with data masking, file rotation, per-level config, critical-meta stripping, lifecycle hooks, and multiple transport targets.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
-- [🏀 &nbsp;Online Playground](https://stackblitz.com/github/hamedfaryabi/nuxt-log?file=playground%2Fapp.vue)
+- [🏀 &nbsp;Online Playground](https://stackblitz.com/github/hamedfaryabi/nuxt-log-utils?file=playground%2Fapp.vue)
 
 ## Features
 
@@ -31,20 +35,20 @@ Install the module:
 
 <!--
 ```bash
-npx nuxi module add nuxt-log
+npx nuxi module add nuxt-log-utils
 ```
 
 Or manually: -->
 
 ```bash
-npm install nuxt-log
+npm install nuxt-log-utils
 ```
 
 Then add it to `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-    modules: ["nuxt-log"],
+    modules: ["nuxt-log-utils"],
 });
 ```
 
@@ -108,7 +112,7 @@ Configure the logger in `nuxt.config.ts` under the `logger` module option key:
 
 ```ts
 export default defineNuxtConfig({
-    modules: ["nuxt-log"],
+    modules: ["nuxt-log-utils"],
     logger: {
         default: {
             minLevel: 200, // LogLevel.INFO
@@ -352,7 +356,7 @@ import type {
     MaskCustomizer,
     LogLevelConfig,
     LoggerFormatterContext,
-} from "nuxt-log";
+} from "nuxt-log-utils";
 ```
 
 ## Server-Side Usage
@@ -368,7 +372,7 @@ export default defineEventHandler(async () => {
 
 ## Compatibility
 
-| nuxt-log  | Nuxt                 |
+| nuxt-log-utils  | Nuxt                 |
 | --------- | -------------------- |
 | `>=0.1.0` | `^3.0.0 \|\| ^4.0.0` |
 
@@ -407,11 +411,11 @@ pnpm run release
 
 <!-- Badges -->
 
-[npm-version-src]: https://img.shields.io/npm/v/nuxt-log/latest.svg?style=flat&colorA=020420&colorB=00DC82
-[npm-version-href]: https://npmjs.com/package/nuxt-log
-[npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-log.svg?style=flat&colorA=020420&colorB=00DC82
-[npm-downloads-href]: https://npm.chart.dev/nuxt-log
-[license-src]: https://img.shields.io/npm/l/nuxt-log.svg?style=flat&colorA=020420&colorB=00DC82
-[license-href]: https://npmjs.com/package/nuxt-log
+[npm-version-src]: https://img.shields.io/npm/v/nuxt-log-utils/latest.svg?style=flat&colorA=020420&colorB=00DC82
+[npm-version-href]: https://npmjs.com/package/nuxt-log-utils
+[npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-log-utils.svg?style=flat&colorA=020420&colorB=00DC82
+[npm-downloads-href]: https://npm.chart.dev/nuxt-log-utils
+[license-src]: https://img.shields.io/npm/l/nuxt-log-utils.svg?style=flat&colorA=020420&colorB=00DC82
+[license-href]: https://npmjs.com/package/nuxt-log-utils
 [nuxt-src]: https://img.shields.io/badge/Nuxt-020420?logo=nuxt
 [nuxt-href]: https://nuxt.com

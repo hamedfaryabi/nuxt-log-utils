@@ -19,6 +19,6 @@ export async function fileTransport(
     await fs.appendFile(fullPath, line)
   }
   catch (error) {
-    console.error('[nuxt-log] File transport error:', error)
+    console.error('[nuxt-log-utils] File transport error:', error)
   }
 }

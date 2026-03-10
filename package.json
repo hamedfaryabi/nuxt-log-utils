@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-log",
+  "name": "nuxt-log-utils",
   "version": "0.2.0",
   "description": "A flexible, extensible logger module for Nuxt 3/4 with masking, file rotation, per-level config, and transport extensions.",
   "license": "MIT",
@@ -8,11 +8,11 @@
   "author": "Hamed Faryabi <hamed.faryabi9@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hamedfaryabi/nuxt-log.git"
+    "url": "git+https://github.com/hamedfaryabi/nuxt-log-utils.git"
   },
-  "homepage": "https://github.com/hamedfaryabi/nuxt-log#readme",
+  "homepage": "https://github.com/hamedfaryabi/nuxt-log-utils#readme",
   "bugs": {
-    "url": "https://github.com/hamedfaryabi/nuxt-log/issues"
+    "url": "https://github.com/hamedfaryabi/nuxt-log-utils/issues"
   },
   "keywords": [
     "nuxt",

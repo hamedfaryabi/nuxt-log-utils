@@ -40,6 +40,6 @@ export async function consoleTransport(
     )
   }
   catch (error) {
-    console.error('[nuxt-log] Console transport error:', error)
+    console.error('[nuxt-log-utils] Console transport error:', error)
   }
 }

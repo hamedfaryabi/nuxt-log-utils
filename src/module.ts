@@ -12,7 +12,7 @@ import serialize from 'serialize-javascript'
 
 export default defineNuxtModule({
   meta: {
-    name: 'nuxt-log',
+    name: 'nuxt-log-utils',
     configKey: 'logger',
   },
 
@@ -28,7 +28,7 @@ export default defineNuxtModule({
     })
 
     const template = addTemplate({
-      filename: 'nuxt-log.plugin.mjs',
+      filename: 'nuxt-log-utils.plugin.mjs',
       getContents: () => `
         import { defineNuxtPlugin } from '#app'
         const loggerConfig = ${serialize(options, {

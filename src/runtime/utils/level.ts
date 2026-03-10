@@ -4,7 +4,7 @@ export function normalizeLevel(level: LogLevel | string): LogLevel {
   if (typeof level === 'number') return level as LogLevel
   const resolved = LogLevel[level.toUpperCase() as keyof typeof LogLevel]
   if (resolved === undefined) {
-    throw new Error(`[nuxt-log] Unknown log level: "${level}"`)
+    throw new Error(`[nuxt-log-utils] Unknown log level: "${level}"`)
   }
   return resolved
 }
