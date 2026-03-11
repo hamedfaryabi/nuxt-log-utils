@@ -53,12 +53,12 @@ export default defineNuxtModule({
     addServerImportsDir(resolver.resolve('runtime/server/utils'))
     addServerHandler({
       route: '/__logger/[name]',
-      handler: resolver.resolve('runtime/server/routes/__logger/[name].post.ts'),
+      handler: resolver.resolve('runtime/server/routes/__logger/[name].post'),
     })
 
     addServerHandler({
       route: '/__logger-config',
-      handler: resolver.resolve('runtime/server/routes/__logger-config.get.ts'),
+      handler: resolver.resolve('runtime/server/routes/__logger-config.get'),
     })
   },
 })
