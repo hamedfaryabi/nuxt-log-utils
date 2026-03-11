@@ -1,6 +1,6 @@
 {
   "name": "nuxt-log-utils",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A flexible, extensible logger module for Nuxt 3/4 with masking, file rotation, per-level config, and transport extensions.",
   "license": "MIT",
   "type": "module",
