@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.5
+
+[compare changes](https://github.com/hamedfaryabi/nuxt-log-utils/compare/v0.2.4...v0.2.5)
+
 ## v0.2.0
 
 ### 🚀 Features
