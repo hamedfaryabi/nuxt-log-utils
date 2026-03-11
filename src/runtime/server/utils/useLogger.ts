@@ -3,6 +3,7 @@ import type { ResolveReturnType } from '../../utils/resolveConfig'
 import { resolveConfig } from '../../utils/resolveConfig'
 import { createLoggerInstance, type LoggerInstance, type StateProvider } from '../../utils/loggerCore'
 import { defu } from 'defu'
+import { useRuntimeConfig } from '#imports'
 
 const configCache = new Map<string, ResolveReturnType>()
 const promiseCache = new Map<string, Promise<ResolveReturnType | null>>()
@@ -29,7 +30,6 @@ export function useLogger(
   const resolvedName = name ?? 'default'
   const cacheKey = `logger-config__${resolvedName}`
 
-  // @ts-expect-error - useRuntimeConfig is auto-imported in Nitro
   const runtime = useRuntimeConfig()
   const serializedDefaults: string = runtime.private.loggerModuleOptions ?? '{}'
   const defaults: LoggerConfig = eval('(' + serializedDefaults + ')')
