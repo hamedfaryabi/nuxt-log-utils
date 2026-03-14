@@ -1,5 +1,6 @@
 export default defineNuxtConfig({
   modules: ['nuxt-log-utils'],
+  ssr: false,
   devtools: { enabled: true },
   runtimeConfig: {
     logger: {

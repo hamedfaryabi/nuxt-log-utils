@@ -1,6 +1,7 @@
 import type { Config } from '../types'
 import { loadJsonConfig } from './config/loadJsonConfig'
 import { parseEnvConfig } from './config/parseEnvConfig'
+import { useRuntimeConfig } from '#imports'
 
 export interface ResolveReturnType extends Record<string, Partial<Config>> {
   env: Partial<Config>
@@ -15,7 +16,6 @@ export interface ResolveReturnType extends Record<string, Partial<Config>> {
 export async function resolveConfig(
   loggerName: string,
 ): Promise<ResolveReturnType> {
-  // @ts-expect-error - useRuntimeConfig is in app
   const runtime = useRuntimeConfig()
 
   const envConfig: Partial<Config> = import.meta.server ? parseEnvConfig(loggerName) : {}

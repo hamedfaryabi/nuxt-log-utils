@@ -1,6 +1,7 @@
 import { defineEventHandler, getQuery } from 'h3'
 import { buildClientConfig } from '../../utils/config/buildClientConfig'
 import { resolveConfig } from '../../utils/resolveConfig'
+import { useRuntimeConfig } from '#imports'
 
 export default defineEventHandler(async (event) => {
   const { name } = getQuery(event)
@@ -13,7 +14,6 @@ export default defineEventHandler(async (event) => {
   }
 
   // Batch: resolve all known logger names
-  // @ts-expect-error - useRuntimeConfig is auto-imported in Nitro
   const runtime = useRuntimeConfig()
   const runtimeLoggers = runtime.logger ?? {}
   const loggerNames = new Set<string>(Object.keys(runtimeLoggers))
